@@ -73,8 +73,10 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
 
             <Reveal delay={0.1}>
               <p className="mx-auto mt-5 max-w-sm text-[1.125rem] leading-relaxed text-ink">
-                Official Starbucks gift cards, paid with $BUCKS, SBUXx, SOL, or USDC. Keep one, or
-                send the link.
+                Official Starbucks gift cards, paid with $BUCKS, SBUXx, SOL, or USDC.
+              </p>
+              <p className="mx-auto mt-2 max-w-sm text-[1.125rem] leading-relaxed text-ink">
+                Keep one, or send the link.
               </p>
             </Reveal>
 
