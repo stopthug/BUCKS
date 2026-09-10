@@ -1,49 +1,41 @@
 import Link from "next/link";
 
-/**
- * The disclaimer is the point of this component, so it is not tucked into
- * fine print: it sits in its own panel, at readable size, above the links.
- */
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-32 pb-12">
+    <footer className="relative z-10 mt-8 bg-paper pb-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="hairline h-px" />
 
         <div className="mt-10 grid gap-10 md:grid-cols-[1.4fr_1fr]">
           <div>
-            <p className="text-lg font-medium tracking-[-0.02em] text-cream-100">
-              coffee meets stocks.
+            <p className="text-lg font-extrabold tracking-[-0.02em] text-ink">$BUCKS</p>
+            <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-ink-soft">
+              $BUCKS is a community project. It is not affiliated with or endorsed by Starbucks
+              Corporation. Starbucks is a trademark of its owner. SBUXx is a third-party token.
             </p>
-            <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-cream-500">
-              $BUCKS is an independent community project and is not affiliated with or endorsed by
-              Starbucks Corporation. Starbucks is a trademark of its respective owner. SBUXx is a
-              third-party tokenized asset. Availability and eligibility may vary.
-            </p>
-            <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-cream-500">
-              Pairing with SBUXx does not make $BUCKS redeemable for SBUXx, and $BUCKS is not backed
-              by Starbucks shares. Gift cards are fulfilled by a third-party provider. Nothing here
-              is financial advice.
+            <p className="mt-3 max-w-xl text-[0.8125rem] leading-relaxed text-ink-soft">
+              Holding $BUCKS does not mean you own Starbucks stock, and it cannot be swapped 1:1
+              for SBUXx. Gift cards come from a third-party seller. This is not financial advice.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
             <nav className="space-y-3">
-              <p className="label-mono">product</p>
-              <FooterLink href="/coffee">buy coffee</FooterLink>
-              <FooterLink href="/gift">send a coffee</FooterLink>
-              <FooterLink href="/account">account</FooterLink>
+              <p className="label-mono">Shop</p>
+              <FooterLink href="/coffee">Get a gift card</FooterLink>
+              <FooterLink href="/gift">Send a gift</FooterLink>
+              <FooterLink href="/account">Account</FooterLink>
             </nav>
             <nav className="space-y-3">
-              <p className="label-mono">token</p>
+              <p className="label-mono">Token</p>
               <FooterLink href="/trade">$BUCKS / SBUXx</FooterLink>
-              <FooterLink href="/about">about</FooterLink>
+              <FooterLink href="/about">About</FooterLink>
             </nav>
           </div>
         </div>
 
-        <p className="mt-12 text-xs text-cream-500/70">
-          © {new Date().getFullYear()} $BUCKS. spend Starbucks stock at Starbucks.
+        <p className="mt-12 text-xs text-ink-soft/80">
+          © {new Date().getFullYear()} $BUCKS
         </p>
       </div>
     </footer>
@@ -54,7 +46,7 @@ function FooterLink({ href, children }: { href: string; children: string }) {
   return (
     <Link
       href={href}
-      className="block text-[0.875rem] text-cream-400 transition-colors duration-200 hover:text-cream-100"
+      className="block text-[0.875rem] font-semibold text-ink-soft transition-colors duration-200 hover:text-ink"
     >
       {children}
     </Link>

@@ -11,7 +11,7 @@ export function Conversion() {
       <div className="mx-auto max-w-5xl">
         <Reveal className="flex items-center justify-center gap-5 sm:gap-8">
           <Token label="$BUCKS" tone="bean" />
-          <span className="font-display text-2xl text-cream-500 italic sm:text-3xl">×</span>
+          <span className="font-display text-2xl font-extrabold text-ink-soft sm:text-3xl">×</span>
           <Token label="SBUXx" tone="mint" />
         </Reveal>
 
@@ -47,7 +47,7 @@ function Token({ label, tone }: { label: string; tone: "bean" | "mint" }) {
     <div className="flex flex-col items-center gap-3">
       <span
         aria-hidden
-        className="size-16 rounded-full sm:size-20"
+        className="size-16 rounded-none sm:size-20"
         style={{
           background: surface,
           boxShadow:
@@ -63,7 +63,7 @@ function Token({ label, tone }: { label: string; tone: "bean" | "mint" }) {
 
 function Chip({ children }: { children: string }) {
   return (
-    <span className="glass rounded-2xl px-6 py-3.5 text-lg font-medium tracking-[-0.02em] text-cream-50">
+    <span className="glass rounded-none px-6 py-3.5 text-lg font-medium tracking-[-0.02em] text-cream-50">
       {children}
     </span>
   );

@@ -23,16 +23,15 @@ export function FeaturedCards({ menu }: { menu: CoffeeMenu }) {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="label-mono">starbucks cards</p>
-              <h2 className="mt-3 text-[clamp(1.75rem,5vw,3rem)] leading-[1.05] font-medium tracking-[-0.04em] text-cream-50">
-                real coffee cards.
-                <span className="font-display text-cream-500 italic"> pick a value.</span>
+              <h2 className="mt-3 text-[clamp(1.75rem,5vw,3rem)] leading-[1.08] font-extrabold tracking-[-0.03em] text-ink">
+                Real coffee cards. Pick a value.
               </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-cream-500">
-                live Starbucks inventory. if it isn&rsquo;t in stock, it isn&rsquo;t here.
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-soft">
+                Live Starbucks inventory. If it isn’t in stock, it isn’t here.
               </p>
             </div>
             <ButtonLink href="/gift" variant="secondary" size="md">
-              send a coffee
+              Send a gift
             </ButtonLink>
           </div>
         </Reveal>
@@ -48,25 +47,23 @@ export function FeaturedCards({ menu }: { menu: CoffeeMenu }) {
                 <RevealItem key={`${offer.categoryId}:${offer.cardId}`}>
                   <Link
                     href={`/coffee?card=${encodeURIComponent(offer.cardId)}`}
-                    className="group glass block overflow-hidden rounded-glass transition-all duration-500 hover:-translate-y-1 hover:border-cream-200/20"
+                    className="group block overflow-visible rounded-glass transition-all duration-500 hover:-translate-y-1"
                   >
                     <div className="relative">
                       <CardArt
-                        src={offer.imageUrl}
                         alt={`${offer.categoryName} ${value} gift card`}
+                        faceValueUsd={offer.faceValueUsd}
+                        seed={offer.cardId}
                         className="rounded-none"
                         priority={index < 4}
                       />
-                      <p className="absolute right-4 bottom-4 text-3xl font-medium tracking-[-0.04em] text-cream-50 drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
-                        {value}
-                      </p>
                     </div>
                     <div className="px-4 py-4">
-                      <p className="truncate text-[0.9375rem] font-medium tracking-[-0.02em] text-cream-50">
+                      <p className="truncate text-[0.9375rem] font-bold tracking-[-0.02em] text-ink">
                         {offer.categoryName}
                       </p>
                       <div className="mt-2 flex items-center justify-between gap-3">
-                        <p className="text-sm text-cream-400">
+                        <p className="text-sm text-ink-soft">
                           {formatUsd(BigInt(offer.providerPriceUsd))} at checkout
                         </p>
                         <span className="inline-flex items-center gap-1.5 text-[0.6875rem] text-forest-300">

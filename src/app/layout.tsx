@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Caveat, IBM_Plex_Mono, Nunito } from "next/font/google";
 
 import { Backdrop } from "@/components/site/backdrop";
 import { Footer } from "@/components/site/footer";
@@ -8,32 +8,39 @@ import { WalletProvider } from "@/components/wallet/wallet-provider";
 
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const display = Instrument_Serif({
-  variable: "--font-display",
+const sans = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "600", "700", "800"],
+});
+const mono = IBM_Plex_Mono({
+  variable: "--font-ibm-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+const doodle = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "$BUCKS — coffee meets stocks.",
+    default: "$BUCKS — buy a Starbucks card with crypto",
     template: "%s — $BUCKS",
   },
   description:
-    "$BUCKS is paired with Starbucks stock on Solana. Spend $BUCKS, SBUXx, SOL or USDC on a real Starbucks card.",
+    "Buy a real Starbucks gift card with $BUCKS, SBUXx, SOL, or USDC. Keep it, or send it as a gift.",
   openGraph: {
-    title: "$BUCKS — coffee meets stocks.",
-    description: "Spend Starbucks stock at Starbucks. Buy a coffee card, or send one to a friend.",
+    title: "$BUCKS — buy a Starbucks card with crypto",
+    description: "Pay with crypto. Get a real Starbucks card. Or send one as a link.",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "$BUCKS — coffee meets stocks." },
+  twitter: { card: "summary_large_image", title: "$BUCKS — buy a Starbucks card with crypto" },
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0705",
+  themeColor: "#f4ead8",
   width: "device-width",
   initialScale: 1,
   // Checkout has to stay legible when a wallet browser zooms it.
@@ -44,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} ${doodle.variable} h-full`}
     >
       <body className="relative flex min-h-full flex-col">
         <Backdrop />

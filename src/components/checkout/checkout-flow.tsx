@@ -241,7 +241,7 @@ export function CheckoutFlow({
   return (
     <div className="mx-auto max-w-2xl">
       {notice ? (
-        <p className="mb-6 rounded-2xl border border-crema-300/30 bg-crema-300/8 px-4 py-3 text-center font-mono text-[0.6875rem] tracking-[0.14em] uppercase text-crema-300">
+        <p className="mb-6 rounded-sm border border-caramel/30 bg-caramel/10 px-4 py-3 text-center text-sm text-ink-soft">
           {notice}
         </p>
       ) : null}
@@ -252,22 +252,20 @@ export function CheckoutFlow({
         {step === "select" ? (
           <Panel key="select">
             <GlassCard className="p-6 sm:p-8">
-              <p className="label-mono">step 01</p>
-              <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-cream-50">
+              <p className="label-mono">Step 1</p>
+              <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
                 {selectedCategory
                   ? mode === "gift"
-                    ? "how much coffee?"
-                    : "choose your coffee."
+                    ? "How much?"
+                    : "Choose a value"
                   : mode === "gift"
-                    ? "which coffee are you sending?"
-                    : "choose your coffee."}
+                    ? "Which card are you sending?"
+                    : "Choose a card"}
               </h2>
-              <p className="mt-2 text-sm text-cream-500">
+              <p className="mt-2 text-sm text-ink-soft">
                 {menu.purchasable
-                  ? selectedCategory
-                    ? "Starbucks cards from live inventory. pick a value."
-                    : "live Starbucks cards. tap one to pick an amount."
-                  : "Starbucks values we'll sell. checkout opens when inventory is live."}
+                  ? "Starbucks gift cards. Tap a value to continue."
+                  : "These are the values we’ll sell. Checkout opens when stock is live."}
               </p>
 
               {!selectedCategory ? (
@@ -280,14 +278,15 @@ export function CheckoutFlow({
                         setCategoryId(category.categoryId);
                         setOffer(null);
                       }}
-                      className="glass-soft overflow-hidden rounded-2xl text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-cream-200/20"
+                      className="overflow-visible text-left transition-transform duration-300 hover:-translate-y-0.5"
                     >
                       <CardArt
-                        src={category.imageUrl}
                         alt={`${category.categoryName} gift card`}
-                        className="rounded-none"
+                        faceValueUsd={category.offers[0]?.faceValueUsd}
+                        seed={category.categoryId}
+                        showValue={false}
                       />
-                      <span className="block px-4 py-3 text-[0.9375rem] font-medium tracking-[-0.02em] text-cream-50">
+                      <span className="mt-2 block px-1 text-[0.9375rem] font-bold tracking-[-0.02em] text-ink">
                         {category.categoryName}
                       </span>
                     </button>
@@ -295,14 +294,6 @@ export function CheckoutFlow({
                 </div>
               ) : (
                 <>
-                  <div className="mt-6 overflow-hidden rounded-2xl">
-                    <CardArt
-                      src={selectedCategory.imageUrl}
-                      alt={`${selectedCategory.categoryName} gift card`}
-                      className="rounded-2xl"
-                    />
-                  </div>
-
                   {categories.length > 1 ? (
                     <button
                       type="button"
@@ -310,16 +301,19 @@ export function CheckoutFlow({
                         setCategoryId(null);
                         setOffer(null);
                       }}
-                      className="mt-3 text-[0.8125rem] text-cream-500 transition-colors hover:text-cream-200"
+                      className="mt-3 text-[0.8125rem] font-semibold text-ink-soft transition-colors hover:text-ink"
                     >
-                      choose a different value
+                      Choose a different card
                     </button>
                   ) : null}
 
-                  <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     {denominations.map((entry) => {
                       const active =
                         offer?.categoryId === entry.categoryId && offer?.cardId === entry.cardId;
+                      const value = entry.faceValueUsd
+                        ? formatUsd(BigInt(entry.faceValueUsd))
+                        : entry.name;
                       return (
                         <button
                           key={`${entry.categoryId}:${entry.cardId}`}
@@ -327,15 +321,16 @@ export function CheckoutFlow({
                           onClick={() => setOffer(entry)}
                           aria-pressed={active}
                           className={cn(
-                            "glass-soft rounded-2xl px-4 py-5 text-left transition-all duration-300",
-                            "hover:-translate-y-0.5 hover:border-cream-200/20 hover:bg-cream-100/8",
-                            active && "border-crema-300/45 bg-cream-100/10",
+                            "overflow-visible rounded-[1.2rem] p-1 text-left transition-transform duration-300 hover:-translate-y-0.5",
+                            active && "ring-2 ring-ink ring-offset-2 ring-offset-foam",
                           )}
                         >
-                          <span className="block text-2xl font-medium tracking-[-0.03em] text-cream-50">
-                            {entry.faceValueUsd ? formatUsd(BigInt(entry.faceValueUsd)) : entry.name}
-                          </span>
-                          <span className="mt-1.5 block font-mono text-[0.6875rem] text-cream-500">
+                          <CardArt
+                            alt={`${entry.categoryName} ${value} gift card`}
+                            faceValueUsd={entry.faceValueUsd}
+                            seed={entry.cardId}
+                          />
+                          <span className="mt-2 block px-1 text-sm font-semibold text-ink-soft">
                             {formatUsd(BigInt(entry.providerPriceUsd))} at checkout
                           </span>
                         </button>
@@ -362,7 +357,7 @@ export function CheckoutFlow({
                 disabled={!offer}
                 onClick={() => setStep("pay")}
               >
-                {offer ? "choose payment" : selectedCategory ? "pick a value" : "pick a coffee"}
+                {offer ? "Continue" : selectedCategory ? "Pick a value" : "Pick a card"}
               </Button>
             </GlassCard>
           </Panel>
@@ -373,9 +368,9 @@ export function CheckoutFlow({
             <GlassCard className="p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="label-mono">step 02</p>
-                  <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-cream-50">
-                    choose payment.
+                  <p className="label-mono">Step 2</p>
+                  <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
+                    Pay
                   </h2>
                 </div>
                 <button
@@ -385,41 +380,44 @@ export function CheckoutFlow({
                     setQuote(null);
                     setAssetSymbol(null);
                   }}
-                  className="text-[0.8125rem] text-cream-500 transition-colors hover:text-cream-200"
+                  className="text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
                 >
-                  change card
+                  Change card
                 </button>
               </div>
 
-              <div className="glass-soft mt-6 flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5">
-                <div>
-                  <p className="text-[0.9375rem] text-cream-100">
-                    {offer.categoryName} gift card
+              <div className="mt-6 grid gap-4 sm:grid-cols-[minmax(0,11rem)_1fr] sm:items-center">
+                <CardArt
+                  alt={`${offer.categoryName} gift card`}
+                  faceValueUsd={offer.faceValueUsd}
+                  seed={offer.cardId}
+                />
+                <div className="glass-soft rounded-[1.2rem] px-4 py-3.5">
+                  <p className="text-[0.9375rem] font-bold text-ink">{offer.categoryName} gift card</p>
+                  <p className="text-xs text-ink-soft">{offer.name}</p>
+                  <p className="mt-2 text-xl font-extrabold tracking-[-0.02em] text-ink">
+                    {offer.faceValueUsd ? formatUsd(BigInt(offer.faceValueUsd)) : "—"}
                   </p>
-                  <p className="text-xs text-cream-500">{offer.name}</p>
                 </div>
-                <p className="text-xl font-medium tracking-[-0.02em] text-cream-50">
-                  {offer.faceValueUsd ? formatUsd(BigInt(offer.faceValueUsd)) : "—"}
-                </p>
               </div>
 
               {!menu.purchasable ? (
-                <div className="glass-soft mt-7 rounded-2xl p-5 text-center">
-                  <p className="text-[0.9375rem] text-cream-100">checkout isn&rsquo;t live yet.</p>
-                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-cream-500">
-                    these are the Starbucks values we&rsquo;ll sell. payment opens once the card
-                    provider is connected.
+                <div className="glass-soft mt-7 rounded-sm p-5 text-center">
+                  <p className="text-[0.9375rem] text-ink">Checkout isn’t open yet.</p>
+                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-soft">
+                    These are the Starbucks values we’ll sell. Payment opens once we can actually
+                    send cards.
                   </p>
                   <div className="mt-4 flex justify-center">
                     <ButtonLink href="/" variant="secondary" size="md">
-                      back to the counter
+                      Back home
                     </ButtonLink>
                   </div>
                 </div>
               ) : connected ? (
                 <>
                   <div className="mt-7">
-                    <p className="label-mono">pay with</p>
+                    <p className="label-mono">Pay with</p>
                     <div className="mt-3">
                       <AssetPicker
                         assets={assetOptions}
@@ -431,7 +429,7 @@ export function CheckoutFlow({
                   </div>
 
                   {busy === "quoting" ? (
-                    <p className="mt-6 text-sm text-cream-400">pricing your card…</p>
+                    <p className="mt-6 text-sm text-ink-soft">Getting your price…</p>
                   ) : null}
 
                   {quote ? (
@@ -445,29 +443,28 @@ export function CheckoutFlow({
                         disabled={busy !== null}
                       >
                         {busy === "signing"
-                          ? "check your wallet"
+                          ? "Check your wallet"
                           : mode === "gift"
-                            ? "send coffee"
-                            : "confirm with wallet"}
+                            ? "Send coffee"
+                            : "Confirm in wallet"}
                       </Button>
 
                       <button
                         type="button"
                         onClick={() => assetSymbol && offer && void requestQuote(offer, assetSymbol)}
                         disabled={busy !== null}
-                        className="mt-3 w-full text-center text-[0.8125rem] text-cream-500 transition-colors hover:text-cream-200"
+                        className="mt-3 w-full text-center text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
                       >
-                        refresh price
+                        Refresh price
                       </button>
                     </div>
                   ) : null}
                 </>
               ) : (
-                <div className="glass-soft mt-7 rounded-2xl p-5 text-center">
-                  <p className="text-[0.9375rem] text-cream-100">connect a wallet to continue.</p>
-                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-cream-500">
-                    you&rsquo;ll sign a message to prove it&rsquo;s yours. we never ask for a seed
-                    phrase or private key.
+                <div className="glass-soft mt-7 rounded-sm p-5 text-center">
+                  <p className="text-[0.9375rem] text-ink">Connect a wallet to continue.</p>
+                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-soft">
+                    You’ll sign a message so we know it’s yours. We never ask for a seed phrase.
                   </p>
                   <div className="mt-4 flex justify-center">
                     <ConnectButton size="md" />
@@ -484,12 +481,12 @@ export function CheckoutFlow({
           <Panel key="settling">
             <GlassCard className="p-10 text-center">
               <Brewing />
-              <h2 className="mt-8 text-2xl font-medium tracking-[-0.02em] text-cream-50">
-                brewing.
+              <h2 className="mt-8 text-2xl font-medium tracking-[-0.02em] text-ink">
+                Brewing
               </h2>
-              <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-cream-500">
-                landing your transaction, verifying it onchain, then buying the card. this takes a
-                few seconds — don&rsquo;t close this tab.
+              <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
+                Confirming your payment on Solana, then buying the card. Keep this tab open — it
+                only takes a few seconds.
               </p>
             </GlassCard>
           </Panel>
@@ -527,8 +524,8 @@ function Panel({ children }: { children: React.ReactNode }) {
 function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
   const labels =
     mode === "gift"
-      ? ["amount", "pay", "share"]
-      : ["amount", "pay", "card"];
+      ? ["Amount", "Pay", "Share"]
+      : ["Amount", "Pay", "Card"];
 
   const index = step === "select" ? 0 : step === "pay" ? 1 : 2;
 
@@ -539,7 +536,7 @@ function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
           <span
             className={cn(
               "font-mono text-[0.6875rem] tracking-[0.14em] uppercase transition-colors duration-300",
-              position <= index ? "text-cream-200" : "text-cream-500/50",
+              position <= index ? "text-ink" : "text-ink-soft/50",
             )}
           >
             {label}
@@ -580,16 +577,16 @@ function Result({
   if (status === "refund_required" || status === "provider_failed") {
     return (
       <GlassCard className="p-8 text-center">
-        <h2 className="text-2xl font-medium tracking-[-0.02em] text-cream-50">
-          your payment is safe.
+        <h2 className="text-2xl font-medium tracking-[-0.02em] text-ink">
+          Your payment is safe.
         </h2>
-        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-cream-400">
-          {errorCopy("refund_required")} we recorded this against your order, and it&rsquo;s
-          visible in your account with the transaction signature.
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
+          {errorCopy("refund_required")} We saved this on your order, with the transaction
+          signature, so you can find it in your account.
         </p>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <ButtonLink href="/account" size="md">
-            open my account
+            Open my account
           </ButtonLink>
         </div>
       </GlassCard>
@@ -599,17 +596,17 @@ function Result({
   if (status !== "ready" && status !== "claimed") {
     return (
       <GlassCard className="p-8 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full bg-forest-500/15 px-3 py-1.5 text-[0.6875rem] text-forest-300">
+        <span className="inline-flex items-center gap-2 rounded-none bg-forest-500/15 px-3 py-1.5 text-[0.6875rem] text-forest-500">
           <StatusDot />
-          payment confirmed onchain
+          Payment confirmed
         </span>
-        <h2 className="mt-5 text-2xl font-medium tracking-[-0.02em] text-cream-50">
-          almost there.
+        <h2 className="mt-5 text-2xl font-medium tracking-[-0.02em] text-ink">
+          Almost there.
         </h2>
-        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-cream-400">
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
           {errorCopy("provider_processing")}
         </p>
-        <p className="mt-6 font-mono text-[0.6875rem] break-all text-cream-500">
+        <p className="mt-6 font-mono text-[0.6875rem] break-all text-ink-soft">
           {settlement.signature}
         </p>
       </GlassCard>
@@ -623,10 +620,10 @@ function Result({
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <h2 className="text-[clamp(2rem,7vw,2.75rem)] leading-none font-medium tracking-[-0.035em] text-cream-50">
-          coffee secured.
+        <h2 className="text-[clamp(2rem,7vw,2.75rem)] leading-none font-medium tracking-[-0.035em] text-ink">
+          You got coffee.
         </h2>
-        <p className="mt-3 text-sm text-cream-500">
+        <p className="mt-3 text-sm text-ink-soft">
           {offer?.categoryName ?? "Starbucks"} gift card · {value}
         </p>
       </div>
@@ -634,15 +631,15 @@ function Result({
       <RevealCard
         onReveal={onReveal}
         title={`${offer?.categoryName ?? "Starbucks"} ${value}`}
-        subtitle="tap reveal when you're ready to use it."
+        subtitle="Tap reveal when you’re ready to use it."
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
         <ButtonLink href="/account" variant="secondary" size="md">
-          my purchases
+          My purchases
         </ButtonLink>
         <ButtonLink href="/gift" variant="secondary" size="md">
-          send one to a friend
+          Send one to a friend
         </ButtonLink>
       </div>
     </div>
@@ -653,24 +650,24 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
   const [copied, setCopied] = useState(false);
   const url = settlement.claimUrl ?? "";
 
-  const shareText = encodeURIComponent(`i bought you a coffee. ${url}`);
+  const shareText = encodeURIComponent(`I got you a Starbucks card: ${url}`);
 
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <h2 className="text-[clamp(1.875rem,6.5vw,2.5rem)] leading-tight font-medium tracking-[-0.035em] text-cream-50">
-          your coffee is ready to send.
+        <h2 className="text-[clamp(1.875rem,6.5vw,2.5rem)] leading-tight font-medium tracking-[-0.035em] text-ink">
+          Ready to send.
         </h2>
-        <p className="mt-3 text-sm text-cream-500">a {value} card, waiting on a link.</p>
+        <p className="mt-3 text-sm text-ink-soft">A {value} card, waiting on a link.</p>
       </div>
 
       <GlassCard className="p-6">
-        <p className="label-mono">gift link</p>
-        <p className="mt-3 rounded-xl bg-espresso-950/50 px-3.5 py-3 font-mono text-[0.8125rem] break-all text-cream-200">
+        <p className="label-mono">Gift link</p>
+        <p className="mt-3 rounded-sm bg-foam px-3.5 py-3 font-mono text-[0.8125rem] break-all text-ink">
           {url}
         </p>
-        <p className="mt-3 text-xs leading-relaxed text-cream-500">
-          the card code is not in this link. whoever opens it claims the coffee once.
+        <p className="mt-3 text-xs leading-relaxed text-ink-soft">
+          The card code is not in this link. Whoever opens it can claim the coffee once.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -684,7 +681,7 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
               });
             }}
           >
-            {copied ? "copied" : "copy gift link"}
+            {copied ? "Copied" : "Copy gift link"}
           </Button>
           <ButtonLink
             href={`https://x.com/intent/tweet?text=${shareText}`}
@@ -692,14 +689,14 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
             size="lg"
             className="flex-1"
           >
-            share on X
+            Share on X
           </ButtonLink>
         </div>
       </GlassCard>
 
       <div className="flex justify-center">
         <ButtonLink href="/account" variant="ghost" size="md">
-          see my sent coffees
+          See my sent coffees
         </ButtonLink>
       </div>
     </div>
@@ -710,16 +707,15 @@ function Unavailable({ reason }: { reason: string | null }) {
   return (
     <div className="mx-auto max-w-xl">
       <GlassCard className="p-10 text-center">
-        <h2 className="text-2xl font-medium tracking-[-0.02em] text-cream-50">
+        <h2 className="text-2xl font-medium tracking-[-0.02em] text-ink">
           {errorCopy(reason)}
         </h2>
-        <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-cream-500">
-          our card provider has no Starbucks inventory we can fulfil right now. we don&rsquo;t list
-          cards we can&rsquo;t deliver, so there is nothing to buy until this clears.
+        <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink-soft">
+          We don’t have Starbucks cards we can send right now. Check back soon.
         </p>
         <div className="mt-8 flex justify-center">
           <ButtonLink href="/" variant="secondary" size="md">
-            back to the counter
+            Back home
           </ButtonLink>
         </div>
       </GlassCard>
@@ -733,11 +729,11 @@ function ErrorNote({ error }: { error: { code: string; message: string } }) {
   );
 
   return (
-    <div className="mt-6 rounded-2xl border border-crema-300/25 bg-crema-300/8 px-4 py-3.5" role="alert">
-      <p className="text-sm text-crema-200">{error.message}</p>
+    <div className="mt-6 rounded-sm border border-crema-300/25 bg-crema-300/8 px-4 py-3.5" role="alert">
+      <p className="text-sm text-roast-500">{error.message}</p>
       {retryable ? (
-        <p className="mt-1 text-xs text-cream-500">
-          nothing was charged. adjust and try again — or{" "}
+        <p className="mt-1 text-xs text-ink-soft">
+          Nothing was charged. Try again — or{" "}
           <Link href="/coffee" className="underline underline-offset-2">
             reload the menu
           </Link>

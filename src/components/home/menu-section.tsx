@@ -63,7 +63,7 @@ export function MenuSection({ menu }: { menu: CoffeeMenu }) {
                         {formatUsd(BigInt(offer.providerPriceUsd))}
                       </p>
 
-                      <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-forest-500/15 px-2.5 py-1 text-[0.6875rem] text-forest-300 sm:mt-0 sm:justify-self-end">
+                      <span className="mt-3 inline-flex items-center gap-1.5 rounded-none bg-forest-500/15 px-2.5 py-1 text-[0.6875rem] text-forest-300 sm:mt-0 sm:justify-self-end">
                         <StatusDot />
                         {offer.stock > 20 ? "in stock" : `${offer.stock} left`}
                       </span>
@@ -99,7 +99,7 @@ function CardChip() {
   return (
     <span
       aria-hidden
-      className="flex size-9 shrink-0 items-end rounded-lg p-1"
+      className="flex size-9 shrink-0 items-end rounded-none p-1"
       style={{
         background: "linear-gradient(150deg, #2d6a46 0%, #1f4d34 55%, #123123 100%)",
         boxShadow:

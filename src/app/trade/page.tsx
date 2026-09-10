@@ -8,26 +8,24 @@ import { getPairMarket } from "@/lib/market/pair";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "trade $BUCKS / SBUXx",
-  description: "$BUCKS is paired with SBUXx, the tokenized Starbucks stock asset on Solana.",
+  title: "Trade $BUCKS / SBUXx",
+  description: "$BUCKS is designed to trade against SBUXx, tokenized Starbucks stock on Solana.",
 };
 
 export default async function TradePage() {
   const market = await getPairMarket().catch(() => null);
 
   return (
-    <div className="px-4 pt-32 pb-16 sm:px-6 sm:pt-40">
+    <div className="px-4 pt-32 pb-24 sm:px-6 sm:pt-36">
       <Reveal>
         <header className="mx-auto max-w-3xl text-center">
-          <p className="label-mono">the pair</p>
-          <h1 className="mt-4 text-[clamp(2.25rem,7vw,3.75rem)] leading-[0.98] font-medium tracking-[-0.04em]">
-            <span className="text-sheen">$BUCKS</span>
-            <span className="text-cream-500"> / </span>
-            <span className="text-sheen">SBUXx</span>
+          <p className="label-mono">The pair</p>
+          <h1 className="font-display mt-4 text-[clamp(2.25rem,7vw,3.75rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
+            $BUCKS / SBUXx
           </h1>
-          <p className="mx-auto mt-5 max-w-lg text-[0.9375rem] leading-relaxed text-cream-400">
-            SBUXx is a third-party tokenized Starbucks stock asset on Solana. $BUCKS is designed to
-            trade against it — and to be spendable on the same coffee.
+          <p className="mx-auto mt-5 max-w-lg text-[1.05rem] leading-relaxed text-ink-soft">
+            SBUXx is tokenized Starbucks stock on Solana. $BUCKS is built to trade next to it —
+            and to buy the same coffee.
           </p>
         </header>
       </Reveal>
@@ -36,9 +34,12 @@ export default async function TradePage() {
         {market ? (
           <PairSection market={market} />
         ) : (
-          <div className="mx-auto max-w-6xl px-0">
+          <div className="mx-auto max-w-6xl">
             <GlassCard className="p-12 text-center">
-              <p className="text-lg text-cream-200">$BUCKS / SBUXx pair coming soon.</p>
+              <p className="text-lg text-ink">The pair isn’t live yet.</p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-soft">
+                When it is, the price will show up here.
+              </p>
             </GlassCard>
           </div>
         )}
@@ -47,24 +48,17 @@ export default async function TradePage() {
       <Reveal>
         <div className="mx-auto mt-16 max-w-3xl">
           <GlassCard className="p-8">
-            <p className="label-mono">read this part</p>
-            <ul className="mt-5 space-y-4 text-sm leading-relaxed text-cream-400">
+            <p className="label-mono">Please read</p>
+            <ul className="mt-5 space-y-4 text-[0.9375rem] leading-relaxed text-ink-soft">
+              <li>$BUCKS is a community project. Starbucks did not create or endorse it.</li>
               <li>
-                $BUCKS is an independent community project. Starbucks Corporation did not create,
-                sponsor, endorse or partner with it.
+                $BUCKS is not backed by Starbucks shares. Trading against SBUXx does not mean you
+                can redeem $BUCKS for stock.
               </li>
+              <li>SBUXx is run by someone else. Their rules, not ours.</li>
               <li>
-                $BUCKS is not backed by Starbucks shares. Trading against SBUXx does not make
-                $BUCKS redeemable for SBUXx, for stock, or for any claim on a company.
-              </li>
-              <li>
-                SBUXx is issued and operated by a third party. Its availability, eligibility and
-                terms are theirs, not ours.
-              </li>
-              <li>
-                The gift-card utility on this site works with $BUCKS, SBUXx, SOL and USDC because
-                any of them can be priced and settled — not because of any relationship with
-                Starbucks.
+                You can pay for a gift card with $BUCKS, SBUXx, SOL, or USDC because we can price
+                them — not because of any deal with Starbucks.
               </li>
             </ul>
           </GlassCard>

@@ -61,8 +61,8 @@ export function distinctDenominations(offers: MenuOffer[]): MenuOffer[] {
 /** Banner shown when the catalog is a fixture or a non-purchasable preview. */
 export function catalogNotice(menu: CoffeeMenu): string | null {
   if (!menu.sandbox) return null;
-  if (!menu.purchasable) return "preview catalog — checkout opens when inventory is live";
-  return "development fixture — not live provider data";
+  if (!menu.purchasable) return "Sample cards — buying isn’t open yet.";
+  return "Test catalog — not live stock.";
 }
 
 export function groupOffersByCategory(offers: MenuOffer[]): MenuCategory[] {

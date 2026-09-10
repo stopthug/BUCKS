@@ -73,11 +73,11 @@ export function ClaimExperience({
   if (view.status === "claimed" && view.canReveal) {
     return (
       <div className="mx-auto max-w-md space-y-6">
-        <Header title="your coffee." subtitle="you already claimed this one." />
+        <Header title="Your coffee." subtitle="You already claimed this one." />
         <RevealCard
           onReveal={revealAgain}
           title={`${view.categoryName} ${value}`}
-          subtitle="same card as before."
+          subtitle="Same card as before."
         />
       </div>
     );
@@ -88,16 +88,15 @@ export function ClaimExperience({
       <div className="mx-auto max-w-md">
         <GlassCard className="p-10 text-center">
           <CupSeal muted />
-          <h1 className="mt-7 text-2xl font-medium tracking-[-0.02em] text-cream-50">
-            this coffee has already been claimed.
+          <h1 className="mt-7 text-2xl font-medium tracking-[-0.02em] text-ink">
+            This coffee’s already been claimed.
           </h1>
-          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-cream-500">
-            each link works exactly once. if this was yours, check the device you opened it on
-            first.
+          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">
+            Each link works once. If this was yours, check the device you opened it on first.
           </p>
           <div className="mt-8 flex justify-center">
             <ButtonLink href="/" variant="secondary" size="md">
-              what is $BUCKS?
+              What is $BUCKS?
             </ButtonLink>
           </div>
         </GlassCard>
@@ -109,11 +108,11 @@ export function ClaimExperience({
     return (
       <div className="mx-auto max-w-md">
         <GlassCard className="p-10 text-center">
-          <h1 className="text-2xl font-medium tracking-[-0.02em] text-cream-50">
-            this coffee hit a snag.
+          <h1 className="text-2xl font-medium tracking-[-0.02em] text-ink">
+            This coffee hit a snag.
           </h1>
-          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-cream-500">
-            the card could not be issued. the person who sent it can see the status on their
+          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">
+            The card couldn’t be issued. The person who sent it can see the status on their
             account, and their payment is recorded.
           </p>
         </GlassCard>
@@ -130,9 +129,8 @@ export function ClaimExperience({
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="text-center">
-            <h1 className="text-[clamp(1.875rem,7vw,2.75rem)] leading-[1.05] font-medium tracking-[-0.035em]">
-              <span className="text-sheen">someone sent</span>
-              <span className="text-sheen font-display block italic">you coffee.</span>
+            <h1 className="text-[clamp(1.875rem,7vw,2.75rem)] leading-[1.08] font-extrabold tracking-[-0.03em] text-ink">
+              Someone sent you coffee.
             </h1>
           </div>
 
@@ -140,17 +138,17 @@ export function ClaimExperience({
             <div className="flex flex-col items-center px-6 py-9 text-center">
               <CupSeal />
 
-              <p className="mt-7 text-3xl font-medium tracking-[-0.03em] text-cream-50">{value}</p>
-              <p className="mt-1.5 text-sm text-cream-500">{view.categoryName} gift card</p>
+              <p className="mt-7 text-3xl font-medium tracking-[-0.03em] text-ink">{value}</p>
+              <p className="mt-1.5 text-sm text-ink-soft">{view.categoryName} gift card</p>
 
               {view.message ? (
-                <p className="font-display mt-7 max-w-xs text-xl leading-snug text-cream-100 italic">
+                <p className="mt-7 max-w-xs text-xl leading-snug text-ink">
                   &ldquo;{view.message}&rdquo;
                 </p>
               ) : null}
 
               {view.senderName ? (
-                <p className="mt-3 text-sm text-cream-400">— {view.senderName}</p>
+                <p className="mt-3 text-sm text-ink-soft">— {view.senderName}</p>
               ) : null}
             </div>
 
@@ -163,29 +161,28 @@ export function ClaimExperience({
                     onClick={() => void claim()}
                     disabled={busy}
                   >
-                    {busy ? "opening" : "claim coffee"}
+                    {busy ? "Opening…" : "Claim coffee"}
                   </Button>
-                  <p className="mt-3 text-center text-xs leading-relaxed text-cream-500">
-                    no app, no wallet, no sign-up. you&rsquo;ll get the card code on the next
-                    screen.
+                  <p className="mt-3 text-center text-xs leading-relaxed text-ink-soft">
+                    No app, no wallet, no sign-up. You’ll get the card code on the next screen.
                   </p>
                 </>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm text-cream-200">{errorCopy("gift_not_ready")}</p>
+                  <p className="text-sm text-ink">{errorCopy("gift_not_ready")}</p>
                   <Button
                     variant="secondary"
                     size="md"
                     className="mt-4"
                     onClick={() => window.location.reload()}
                   >
-                    check again
+                    Check again
                   </Button>
                 </div>
               )}
 
               {error ? (
-                <p className="mt-4 text-center text-sm text-crema-300" role="alert">
+                <p className="mt-4 text-center text-sm text-roast-500" role="alert">
                   {error}
                 </p>
               ) : null}
@@ -211,10 +208,10 @@ function Enjoy({
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-[clamp(2.5rem,10vw,4rem)] leading-none font-medium tracking-[-0.04em]">
-          <span className="text-sheen">enjoy.</span>
+        <h1 className="text-[clamp(2.5rem,10vw,4rem)] leading-none font-medium tracking-[-0.04em] text-ink">
+          Enjoy.
         </h1>
-        <p className="mt-3 text-sm text-cream-500">
+        <p className="mt-3 text-sm text-ink-soft">
           your {categoryName} gift card · {value}
         </p>
       </div>
@@ -229,7 +226,7 @@ function Enjoy({
 
       <div className="flex justify-center">
         <ButtonLink href="/" variant="ghost" size="md">
-          what is $BUCKS?
+          What is $BUCKS?
         </ButtonLink>
       </div>
     </div>
@@ -239,10 +236,10 @@ function Enjoy({
 function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="text-center">
-      <h1 className="text-[clamp(2rem,8vw,3rem)] leading-none font-medium tracking-[-0.04em]">
-        <span className="text-sheen">{title}</span>
+      <h1 className="text-[clamp(2rem,8vw,3rem)] leading-none font-medium tracking-[-0.04em] text-ink">
+        {title}
       </h1>
-      <p className="mt-3 text-sm text-cream-500">{subtitle}</p>
+      <p className="mt-3 text-sm text-ink-soft">{subtitle}</p>
     </div>
   );
 }
@@ -252,7 +249,7 @@ function CupSeal({ muted }: { muted?: boolean }) {
   return (
     <span
       aria-hidden
-      className="relative flex size-20 items-center justify-center rounded-full"
+      className="relative flex size-20 items-center justify-center rounded-none"
       style={{
         background: muted
           ? "radial-gradient(65% 60% at 34% 28%, rgba(226,205,178,0.35) 0%, rgba(74,51,37,0.5) 45%, rgba(20,13,9,0.9) 100%)"

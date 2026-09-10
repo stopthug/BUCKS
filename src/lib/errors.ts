@@ -6,51 +6,51 @@
 
 export const ERROR_COPY = {
   // Auth / session
-  unauthorized: "connect your wallet to continue.",
-  nonce_invalid: "that login request expired. try connecting again.",
-  signature_invalid: "we could not verify that signature.",
-  rate_limited: "too many requests. give it a moment.",
-  invalid_request: "something about that request was off. try again.",
-  not_found: "we could not find that.",
-  forbidden: "that isn't yours to open.",
+  unauthorized: "Connect your wallet to keep going.",
+  nonce_invalid: "That login request expired. Try connecting again.",
+  signature_invalid: "We couldn’t verify that signature.",
+  rate_limited: "Too many requests. Give it a second.",
+  invalid_request: "Something about that request was off. Try again.",
+  not_found: "We couldn’t find that.",
+  forbidden: "That isn’t yours to open.",
 
   // Provider catalog / fulfillment capacity
-  provider_unconfigured: "coffee cards are temporarily unavailable.",
-  starbucks_unavailable: "coffee cards are temporarily unavailable.",
-  offer_unavailable: "that card just sold out. pick another value.",
-  out_of_stock: "that card just sold out. pick another value.",
-  provider_balance_low: "coffee purchases are temporarily unavailable.",
-  provider_timeout: "our card provider is slow right now. we did not charge you.",
-  provider_failed: "the card provider could not complete this order.",
-  provider_processing: "your card is still being prepared. this page updates itself.",
+  provider_unconfigured: "Starbucks cards are sold out right now.",
+  starbucks_unavailable: "Starbucks cards are sold out right now.",
+  offer_unavailable: "That card just sold out. Pick another value.",
+  out_of_stock: "That card just sold out. Pick another value.",
+  provider_balance_low: "Coffee purchases are paused for a bit.",
+  provider_timeout: "The card seller is slow right now. You were not charged.",
+  provider_failed: "The card seller couldn’t finish this order.",
+  provider_processing: "Your card is still being prepared. This page updates itself.",
 
   // Quoting
-  asset_not_configured: "that asset isn't available yet.",
-  no_route: "no route for that asset right now. try USDC or SOL.",
-  liquidity_unavailable: "not enough liquidity to price that right now.",
-  quote_expired: "that price expired. refresh for a new quote.",
-  quote_used: "that quote was already used.",
+  asset_not_configured: "That token isn’t available yet.",
+  no_route: "No route for that token right now. Try USDC or SOL.",
+  liquidity_unavailable: "Not enough liquidity to price that right now.",
+  quote_expired: "That price expired. Refresh for a new one.",
+  quote_used: "That quote was already used.",
 
   // Wallet / payment
-  insufficient_balance: "not enough in your wallet for this one.",
-  insufficient_sol_for_fees: "you need a little more SOL to cover the network fee.",
-  wallet_rejected: "you cancelled the transaction. nothing was charged.",
-  transaction_failed: "that transaction did not land. nothing was charged.",
-  transaction_not_found: "we can't see that transaction onchain yet. try again shortly.",
-  verification_failed: "we could not verify that payment onchain.",
-  payment_amount_mismatch: "the amount received did not match the quote.",
-  signature_reused: "that transaction was already used for another order.",
-  payment_pending: "we're still confirming your payment.",
+  insufficient_balance: "Not enough in your wallet for this one.",
+  insufficient_sol_for_fees: "You need a little more SOL for the network fee.",
+  wallet_rejected: "You cancelled. Nothing was charged.",
+  transaction_failed: "That transaction didn’t land. Nothing was charged.",
+  transaction_not_found: "We can’t see that transaction on-chain yet. Try again shortly.",
+  verification_failed: "We couldn’t verify that payment on-chain.",
+  payment_amount_mismatch: "The amount received didn’t match the quote.",
+  signature_reused: "That transaction was already used for another order.",
+  payment_pending: "We’re still confirming your payment.",
 
   // Gifting / claiming
-  already_claimed: "this coffee has already been claimed.",
-  gift_not_ready: "this coffee isn't ready yet. check back in a moment.",
-  message_too_long: "keep the message under 120 characters.",
+  already_claimed: "This coffee has already been claimed.",
+  gift_not_ready: "This coffee isn’t ready yet. Check back in a moment.",
+  message_too_long: "Keep the message under 120 characters.",
 
   // Recovery
-  refund_required: "your payment went through but the card did not. our team is on it.",
+  refund_required: "Your payment went through, but the card didn’t. We’re on it.",
 
-  internal: "something broke on our side. your payment is safe and recorded.",
+  internal: "Something broke on our side. Your payment is safe and recorded.",
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_COPY;

@@ -52,11 +52,11 @@ export function ConnectButton({
         <AnimatePresence>
           {menuOpen ? (
             <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.97 }}
+              initial={{ opacity: 0, y: 6, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+              exit={{ opacity: 0, y: 6, scale: 0.97 }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="glass absolute right-0 z-50 mt-2 w-52 rounded-2xl p-2"
+              className="glass absolute right-0 top-full z-50 mt-2 w-52 rounded-sm p-2"
             >
               <button
                 type="button"
@@ -64,9 +64,9 @@ export function ConnectButton({
                   setMenuOpen(false);
                   void navigator.clipboard?.writeText(address);
                 }}
-                className="w-full rounded-xl px-3 py-2 text-left text-sm text-cream-200 transition-colors hover:bg-cream-100/8"
+                className="w-full px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-ink/5"
               >
-                copy address
+                Copy address
               </button>
               <button
                 type="button"
@@ -74,9 +74,9 @@ export function ConnectButton({
                   setMenuOpen(false);
                   void disconnect();
                 }}
-                className="w-full rounded-xl px-3 py-2 text-left text-sm text-cream-400 transition-colors hover:bg-cream-100/8 hover:text-cream-100"
+                className="w-full px-3 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
               >
-                disconnect
+                Disconnect
               </button>
             </motion.div>
           ) : null}
@@ -97,7 +97,7 @@ export function ConnectButton({
         }}
         disabled={busy}
       >
-        {busy ? (status === "signing-in" ? "sign to continue" : "connecting") : "connect wallet"}
+        {busy ? (status === "signing-in" ? "Sign to continue" : "Connecting…") : "Connect wallet"}
       </Button>
 
       <AnimatePresence>
@@ -113,7 +113,7 @@ export function ConnectButton({
               type="button"
               aria-label="close"
               onClick={() => setOpen(false)}
-              className="absolute inset-0 bg-espresso-950/80 backdrop-blur-md"
+              className="absolute inset-0 bg-ink/40 backdrop-blur-md"
             />
 
             <motion.div
@@ -124,22 +124,21 @@ export function ConnectButton({
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 30, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="glass relative z-10 w-full max-w-md rounded-t-glass p-6 pb-8 sm:rounded-glass sm:pb-6"
+              className="glass relative z-10 w-full max-w-md rounded-none p-6 sm:pb-6"
             >
-              <p className="label-mono">connect</p>
-              <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-cream-50">
-                choose your wallet.
+              <p className="label-mono">Connect</p>
+              <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
+                Choose a wallet
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-cream-400">
-                you&rsquo;ll sign a message to prove the wallet is yours. we never ask for a seed
-                phrase or a private key.
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                You’ll sign a message so we know it’s yours. We never ask for a seed phrase.
               </p>
 
               <div className="mt-6 space-y-2">
                 {wallets.length === 0 ? (
-                  <div className="glass-soft rounded-2xl p-4 text-sm text-cream-400">
-                    no Solana wallet detected in this browser. install Phantom, Solflare or
-                    Backpack, then reload this page.
+                  <div className="glass-soft rounded-sm p-4 text-sm text-ink-soft">
+                    No Solana wallet in this browser. Install Phantom, Solflare, or Backpack, then
+                    reload.
                   </div>
                 ) : (
                   wallets.map((entry) => (
@@ -153,35 +152,35 @@ export function ConnectButton({
                       }}
                       disabled={busy}
                       className={cn(
-                        "glass-soft flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-200",
+                        "glass-soft flex w-full items-center gap-3 rounded-sm px-4 py-3.5 text-left transition-all duration-200",
                         "hover:border-cream-200/20 hover:bg-cream-100/8 disabled:opacity-50",
                       )}
                     >
                       {entry.icon ? (
                         // Wallet icons arrive as data URIs from the registry.
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={entry.icon} alt="" className="size-7 rounded-lg" />
+                        <img src={entry.icon} alt="" className="size-7 rounded-none" />
                       ) : (
-                        <span className="size-7 rounded-lg bg-roast-500/40" />
+                        <span className="size-7 rounded-none bg-roast-500/40" />
                       )}
-                      <span className="flex-1 text-[0.9375rem] text-cream-100">{entry.name}</span>
-                      <span className="text-cream-500">→</span>
+                      <span className="flex-1 text-[0.9375rem] text-ink">{entry.name}</span>
+                      <span className="text-ink-soft">→</span>
                     </button>
                   ))
                 )}
               </div>
 
               {error ? (
-                <p className="mt-4 text-sm text-crema-300" role="alert">
+                <p className="mt-4 text-sm text-roast-500" role="alert">
                   {error}
                 </p>
               ) : null}
 
               {busy ? (
-                <p className="mt-4 text-sm text-cream-400">
+                <p className="mt-4 text-sm text-ink-soft">
                   {status === "signing-in"
-                    ? "approve the signature request in your wallet."
-                    : "waiting for your wallet."}
+                    ? "Approve the signature in your wallet."
+                    : "Waiting for your wallet…"}
                 </p>
               ) : null}
             </motion.div>

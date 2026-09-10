@@ -33,7 +33,7 @@ export function RevealCard({
     try {
       setRedemption(await onReveal());
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "could not load your card.");
+      setError(cause instanceof Error ? cause.message : "Couldn’t load your card.");
     } finally {
       setLoading(false);
     }
@@ -42,9 +42,9 @@ export function RevealCard({
   return (
     <div className="glass rounded-glass overflow-hidden">
       <div className="border-b border-cream-200/8 px-6 py-5">
-        <p className="label-mono">your card</p>
-        <p className="mt-2 text-xl font-medium tracking-[-0.02em] text-cream-50">{title}</p>
-        {subtitle ? <p className="mt-1 text-sm text-cream-500">{subtitle}</p> : null}
+        <p className="label-mono">Your card</p>
+        <p className="mt-2 text-xl font-medium tracking-[-0.02em] text-ink">{title}</p>
+        {subtitle ? <p className="mt-1 text-sm text-ink-soft">{subtitle}</p> : null}
       </div>
 
       <div className="p-6">
@@ -58,13 +58,13 @@ export function RevealCard({
               className="space-y-4"
             >
               {redemption.cards.map((card, index) => (
-                <div key={index} className="glass-soft space-y-3 rounded-2xl p-4">
+                <div key={index} className="glass-soft space-y-3 rounded-sm p-4">
                   {card.code ? <Secret label="code" value={card.code} /> : null}
                   {card.pin ? <Secret label="pin" value={card.pin} /> : null}
                   {card.serial ? <Secret label="serial" value={card.serial} /> : null}
                   {card.expiresAt ? <Detail label="expires" value={card.expiresAt} /> : null}
                   {card.instructions ? (
-                    <p className="text-[0.8125rem] leading-relaxed text-cream-400">
+                    <p className="text-[0.8125rem] leading-relaxed text-ink-soft">
                       {card.instructions}
                     </p>
                   ) : null}
@@ -74,9 +74,8 @@ export function RevealCard({
                 </div>
               ))}
 
-              <p className="text-xs leading-relaxed text-cream-500">
-                save this somewhere safe. redeem it in the Starbucks app or at the counter,
-                following the provider&rsquo;s terms for your region.
+              <p className="text-xs leading-relaxed text-ink-soft">
+                Save this somewhere safe. Redeem it in the Starbucks app or at the counter.
               </p>
             </motion.div>
           ) : (
@@ -87,18 +86,18 @@ export function RevealCard({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <div className="relative overflow-hidden rounded-2xl">
+              <div className="relative overflow-hidden rounded-sm">
                 {/* Blurred stand-in so the reveal has something to reveal */}
                 <div className="glass-soft space-y-3 p-4 blur-[7px] select-none" aria-hidden>
-                  <div className="h-3 w-24 rounded-full bg-cream-200/20" />
-                  <div className="h-6 w-full rounded-full bg-cream-200/15" />
-                  <div className="h-3 w-16 rounded-full bg-cream-200/20" />
-                  <div className="h-6 w-24 rounded-full bg-cream-200/15" />
+                  <div className="h-3 w-24 rounded-none bg-cream-200/20" />
+                  <div className="h-6 w-full rounded-none bg-cream-200/15" />
+                  <div className="h-3 w-16 rounded-none bg-cream-200/20" />
+                  <div className="h-6 w-24 rounded-none bg-cream-200/15" />
                 </div>
               </div>
 
               <Button className="mt-5 w-full" size="lg" onClick={() => void reveal()} disabled={loading}>
-                {loading ? "unlocking" : "reveal gift card"}
+                {loading ? "Unlocking…" : "Reveal gift card"}
               </Button>
             </motion.div>
           )}
@@ -130,15 +129,15 @@ function Secret({ label, value }: { label: string; value: string }) {
           });
         }}
         className={cn(
-          "mt-1.5 flex w-full items-center justify-between gap-3 rounded-xl bg-espresso-950/50 px-3.5 py-3 text-left transition-colors duration-200",
-          "hover:bg-espresso-950/70",
+          "mt-1.5 flex w-full items-center justify-between gap-3 rounded-sm bg-foam px-3.5 py-3 text-left transition-colors duration-200",
+          "hover:bg-cream-50",
         )}
       >
-        <span className="font-mono text-[0.9375rem] break-all text-cream-50 select-all">
+        <span className="font-mono text-[0.9375rem] break-all text-ink select-all">
           {value}
         </span>
-        <span className="shrink-0 text-[0.6875rem] text-cream-500">
-          {copied ? "copied" : "copy"}
+        <span className="shrink-0 text-[0.6875rem] text-ink-soft">
+          {copied ? "Copied" : "Copy"}
         </span>
       </button>
     </div>
@@ -149,7 +148,7 @@ function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <span className="label-mono">{label}</span>
-      <span className="text-right font-mono text-[0.8125rem] text-cream-300">{value}</span>
+      <span className="text-right font-mono text-[0.8125rem] text-ink-soft">{value}</span>
     </div>
   );
 }

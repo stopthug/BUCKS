@@ -18,10 +18,10 @@ export function PaymentSummary({ quote }: { quote: QuoteResponse }) {
     <div className="space-y-4">
       <div className="flex items-baseline justify-between gap-4">
         <div>
-          <p className="label-mono">you pay</p>
-          <p className="mt-2 text-[clamp(1.75rem,7vw,2.5rem)] leading-none font-medium tracking-[-0.03em] text-cream-50">
+          <p className="label-mono">You pay</p>
+          <p className="mt-2 text-[clamp(1.75rem,7vw,2.5rem)] leading-none font-medium tracking-[-0.03em] text-ink">
             {formatTokenAmount(BigInt(quote.payAmount), quote.asset.decimals)}{" "}
-            <span className="text-lg text-cream-400">{quote.asset.label}</span>
+            <span className="text-lg text-ink-soft">{quote.asset.label}</span>
           </p>
         </div>
         <QuoteTimer expiresAt={quote.expiresAt} />
@@ -31,22 +31,22 @@ export function PaymentSummary({ quote }: { quote: QuoteResponse }) {
 
       <dl className="space-y-3 text-sm">
         <Row
-          label="gift card value"
+          label="Gift card value"
           value={quote.card.faceValueUsd ? formatUsd(BigInt(quote.card.faceValueUsd)) : quote.card.name}
         />
-        <Row label="card cost" value={formatUsd(BigInt(quote.card.providerPriceUsd))} />
-        <Row label="$BUCKS platform fee" value={formatUsd(BigInt(quote.costs.platformFeeUsd))} accent />
+        <Row label="Card cost" value={formatUsd(BigInt(quote.card.providerPriceUsd))} />
+        <Row label="Platform fee" value={formatUsd(BigInt(quote.costs.platformFeeUsd))} accent />
         <Row
-          label="network / swap costs"
+          label="Network / swap"
           value={describeNetworkCosts(quote)}
           hint={quote.costs.routeLabel ? `via ${quote.costs.routeLabel}` : undefined}
         />
       </dl>
 
-      <p className="text-xs leading-relaxed text-cream-500">
+      <p className="text-xs leading-relaxed text-ink-soft">
         {quote.asset.symbol === "USDC"
-          ? "USDC is transferred directly — no swap, no extra hop."
-          : `your ${quote.asset.label} is swapped to USDC at settlement. the swap is guaranteed to deliver at least ${formatUsd(BigInt(quote.costs.guaranteedUsdc))} or it does not execute at all.`}
+          ? "USDC goes straight through — no swap."
+          : `Your ${quote.asset.label} is swapped to USDC. The swap only goes through if it delivers at least ${formatUsd(BigInt(quote.costs.guaranteedUsdc))}.`}
       </p>
     </div>
   );
@@ -65,12 +65,12 @@ function Row({
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-cream-500">{label}</dt>
+      <dt className="text-ink-soft">{label}</dt>
       <dd className="text-right">
-        <span className={cn("font-mono", accent ? "text-forest-300" : "text-cream-100")}>
+        <span className={cn("font-mono", accent ? "text-forest-500" : "text-ink")}>
           {value}
         </span>
-        {hint ? <span className="mt-0.5 block text-[0.6875rem] text-cream-500">{hint}</span> : null}
+        {hint ? <span className="mt-0.5 block text-[0.6875rem] text-ink-soft">{hint}</span> : null}
       </dd>
     </div>
   );
@@ -101,14 +101,14 @@ export function QuoteTimer({ expiresAt }: { expiresAt: string }) {
 
   return (
     <div className="text-right">
-      <p className="label-mono">{expired ? "expired" : "price holds"}</p>
+      <p className="label-mono">{expired ? "Expired" : "Price holds"}</p>
       <p
         className={cn(
           "mt-1.5 font-mono text-sm tabular-nums",
-          expired ? "text-crema-300" : "text-cream-300",
+          expired ? "text-roast-500" : "text-ink-soft",
         )}
       >
-        {expired ? "refresh" : `${remaining}s`}
+        {expired ? "Refresh" : `${remaining}s`}
       </p>
     </div>
   );

@@ -41,7 +41,7 @@ export function AssetPicker({
             disabled={disabled}
             aria-pressed={active}
             className={cn(
-              "glass-soft flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-300",
+              "glass-soft flex items-center justify-between gap-3 rounded-sm px-4 py-3.5 text-left transition-all duration-300",
               "hover:border-cream-200/20 hover:bg-cream-100/8 disabled:opacity-50",
               active && "border-crema-300/45 bg-cream-100/10",
             )}
@@ -49,11 +49,11 @@ export function AssetPicker({
             <span className="flex items-center gap-3">
               <AssetGlyph symbol={asset.symbol} />
               <span>
-                <span className="block text-[0.9375rem] text-cream-100">{asset.label}</span>
+                <span className="block text-[0.9375rem] text-ink">{asset.label}</span>
                 <span
                   className={cn(
                     "block font-mono text-[0.6875rem]",
-                    empty ? "text-cream-500/70" : "text-cream-500",
+                    empty ? "text-ink-soft/70" : "text-ink-soft",
                   )}
                 >
                   {asset.balance === null
@@ -65,7 +65,7 @@ export function AssetPicker({
 
             <span
               className={cn(
-                "size-4 shrink-0 rounded-full border transition-colors duration-200",
+                "size-4 shrink-0 border transition-colors duration-200",
                 active ? "border-crema-300 bg-crema-300" : "border-cream-200/25",
               )}
             />
@@ -87,7 +87,7 @@ function AssetGlyph({ symbol }: { symbol: string }) {
   return (
     <span
       aria-hidden
-      className="size-8 shrink-0 rounded-full"
+      className="size-8 shrink-0 rounded-none"
       style={{
         background: GLYPHS[symbol] ?? GLYPHS.BUCKS,
         boxShadow:

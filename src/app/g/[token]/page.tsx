@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  * engines and referrers.
  */
 export const metadata: Metadata = {
-  title: "someone sent you coffee.",
+  title: "Someone sent you coffee",
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };
@@ -37,7 +37,7 @@ export default async function ClaimPage({
   }
 
   return (
-    <div className="px-4 pt-32 pb-20 sm:px-6 sm:pt-40">
+    <div className="px-4 pt-32 pb-24 sm:px-6 sm:pt-36">
       <ClaimExperience token={token} initial={view} />
     </div>
   );

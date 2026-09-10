@@ -22,7 +22,7 @@ export function GlassPill({ children, className }: { children: ReactNode; classN
   return (
     <span
       className={cn(
-        "glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs text-cream-200",
+        "glass inline-flex items-center gap-2 rounded-none px-3.5 py-1.5 text-xs text-ink-soft",
         className,
       )}
     >
@@ -52,20 +52,20 @@ export function SectionHeading({
   return (
     <h2
       className={cn(
-        "text-[clamp(1.75rem,4.4vw,3rem)] leading-[1.05] font-medium tracking-[-0.03em]",
+        "text-[clamp(1.75rem,4.4vw,3rem)] font-display leading-[1.08] font-extrabold tracking-[-0.03em]",
         className,
       )}
     >
-      <span className="text-cream-50">{lead}</span>
-      {trail ? <span className="text-cream-500"> {trail}</span> : null}
+      <span className="text-ink">{lead}</span>
+      {trail ? <span className="text-ink-soft"> {trail}</span> : null}
     </h2>
   );
 }
 
 export function StatusDot({ tone = "green" }: { tone?: "green" | "amber" | "muted" }) {
   const tones = {
-    green: "bg-forest-300 shadow-[0_0_0_3px_rgba(107,180,137,0.16)]",
-    amber: "bg-crema-300 shadow-[0_0_0_3px_rgba(200,168,130,0.16)]",
+    green: "bg-forest-400",
+    amber: "bg-crema-300",
     muted: "bg-cream-500/60",
   } as const;
 
