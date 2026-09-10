@@ -1,4 +1,3 @@
-import { FeaturedCards } from "@/components/home/featured-cards";
 import { Hero } from "@/components/home/hero";
 import { PairSection } from "@/components/home/pair-section";
 import { Statement, Utility } from "@/components/home/utility";
@@ -15,8 +14,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
-      <FeaturedCards menu={menu} />
+      <Hero menu={menu} />
       <Utility />
       <Statement />
       {market ? <PairSection market={market} /> : null}
