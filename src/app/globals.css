@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   $BUCKS design tokens
+
+   Dark espresso ground, cream type, one restrained green accent. Surfaces are
+   translucent and layered rather than filled, so the page reads as glass over
+   warm depth instead of boxes on a background.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  /* Espresso ground */
+  --color-espresso-950: #0b0705;
+  --color-espresso-900: #140d09;
+  --color-espresso-850: #1b120d;
+  --color-espresso-800: #241811;
+  --color-espresso-700: #33231a;
+  --color-espresso-600: #4a3325;
+
+  /* Roast + crema */
+  --color-roast-500: #6b4a34;
+  --color-roast-400: #8a6247;
+  --color-crema-300: #c8a882;
+  --color-crema-200: #e2cdb2;
+
+  /* Cream type */
+  --color-cream-50: #fdf9f3;
+  --color-cream-100: #f6efe4;
+  --color-cream-200: #e8ddcc;
+  --color-cream-400: #b9a893;
+  --color-cream-500: #8f8071;
+
+  /* Forest green accent, used sparingly */
+  --color-forest-600: #1f4d34;
+  --color-forest-500: #2d6a46;
+  --color-forest-400: #3f8d5d;
+  --color-forest-300: #6bb489;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-display), Georgia, serif;
+
+  --radius-glass: 1.75rem;
+
+  --animate-drift: drift 34s ease-in-out infinite;
+  --animate-drift-slow: drift 52s ease-in-out infinite;
+  --animate-steam: steam 9s ease-in-out infinite;
+  --animate-rise: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(2.2rem, -1.6rem, 0) rotate(4deg);
+  }
+  66% {
+    transform: translate3d(-1.4rem, 1.2rem, 0) rotate(-3deg);
+  }
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-1.5rem) scale(1.08);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* --------------------------------------------------------------------------- */
+
+* {
+  border-color: color-mix(in oklab, var(--color-cream-200) 10%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Keeps sticky-header offsets honest when jumping to a section. */
+  scroll-padding-top: 6rem;
+  background-color: var(--color-espresso-950);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background-color: var(--color-espresso-950);
+  color: var(--color-cream-100);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-forest-400) 35%, transparent);
+  color: var(--color-cream-50);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-crema-300);
+  outline-offset: 3px;
+}
+
+/* Warm, slim scrollbar rather than the default grey slab. */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-espresso-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-roast-500) 70%, transparent);
+    border-radius: 999px;
+    border: 3px solid var(--color-espresso-950);
+  }
+}
+
+@utility glass {
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--color-cream-100) 9%, transparent),
+      color-mix(in oklab, var(--color-cream-100) 3%, transparent) 52%,
+      color-mix(in oklab, var(--color-espresso-900) 26%, transparent)
+    );
+  backdrop-filter: blur(28px) saturate(135%);
+  -webkit-backdrop-filter: blur(28px) saturate(135%);
+  border: 1px solid color-mix(in oklab, var(--color-cream-100) 12%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--color-cream-50) 14%, transparent) inset,
+    0 -1px 0 0 color-mix(in oklab, var(--color-espresso-950) 40%, transparent) inset,
+    0 30px 70px -35px rgba(0, 0, 0, 0.85);
+}
+
+@utility glass-soft {
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--color-cream-100) 6%, transparent),
+    color-mix(in oklab, var(--color-espresso-900) 22%, transparent)
+  );
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border: 1px solid color-mix(in oklab, var(--color-cream-100) 8%, transparent);
+}
+
+/* Cream type with a subtle sheen, used for the largest statements only. */
+@utility text-sheen {
+  background: linear-gradient(
+    176deg,
+    var(--color-cream-50) 8%,
+    var(--color-cream-100) 42%,
+    var(--color-crema-300) 96%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-cream-500);
+}
+
+/* Hairline used to separate sections without drawing a hard rule. */
+@utility hairline {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-cream-200) 16%, transparent) 22%,
+    color-mix(in oklab, var(--color-cream-200) 16%, transparent) 78%,
+    transparent
+  );
+}
