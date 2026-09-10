@@ -57,8 +57,8 @@ export function AssetPicker({
                   )}
                 >
                   {asset.balance === null
-                    ? "—"
-                    : `${formatTokenAmount(BigInt(asset.balance), asset.decimals)} in wallet`}
+                    ? "Choose to pay"
+                    : `${formatTokenAmount(BigInt(asset.balance), asset.decimals)} available`}
                 </span>
               </span>
             </span>

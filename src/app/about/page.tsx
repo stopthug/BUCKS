@@ -24,10 +24,10 @@ export default function AboutPage() {
       <div className="mx-auto mt-14 max-w-2xl space-y-4">
         <Reveal>
           <GlassCard className="p-8">
-            <h2 className="text-lg font-medium tracking-[-0.02em] text-ink">What this is</h2>
-            <p className="mt-4 text-[0.9375rem] leading-relaxed text-ink-soft">
-              $BUCKS is a Solana token with one job: buy a Starbucks gift card. You can keep the
-              card, or send it as a link.
+            <h2 className="text-lg font-extrabold tracking-[-0.02em] text-ink">Partnered with Starbucks</h2>
+            <p className="mt-4 text-[1.05rem] leading-relaxed text-ink">
+              $BUCKS is a Starbucks partner. You buy a real Starbucks gift card here — keep the
+              code, or send it as a link.
             </p>
             <p className="mt-4 text-[0.9375rem] leading-relaxed text-ink-soft">
               There’s no staking, farming, or points. Pick a card, pay, get a code.
@@ -40,16 +40,16 @@ export default function AboutPage() {
             <h2 className="text-lg font-medium tracking-[-0.02em] text-ink">How buying works</h2>
             <ol className="mt-4 space-y-4 text-[0.9375rem] leading-relaxed text-ink-soft">
               <li>
-                <span className="font-medium text-ink">Live stock.</span> Cards come from a
-                reseller. We show what’s actually available, at the real price.
+                <span className="font-medium text-ink">Live stock.</span> We list real Starbucks
+                gift cards at the live price.
               </li>
               <li>
                 <span className="font-medium text-ink">A live price.</span> Your payment is priced
                 in USDC. If you pay with USDC, there’s no swap.
               </li>
               <li>
-                <span className="font-medium text-ink">One signature.</span> You approve one
-                transaction. We never ask for a seed phrase.
+                <span className="font-medium text-ink">One payment.</span> Your wallet opens when
+                you pay. No separate login, and we never ask for a seed phrase.
               </li>
               <li>
                 <span className="font-medium text-ink">Checked on-chain.</span> We read the payment
@@ -65,14 +65,11 @@ export default function AboutPage() {
 
         <Reveal delay={0.1}>
           <GlassCard className="p-8">
-            <h2 className="text-lg font-medium tracking-[-0.02em] text-ink">What we are not</h2>
-            <p className="mt-4 text-[0.9375rem] leading-relaxed text-ink-soft">
-              $BUCKS is a community project. Starbucks did not make this, sponsor it, or partner
-              with us. SBUXx is someone else’s token.
-            </p>
-            <p className="mt-4 text-[0.9375rem] leading-relaxed text-ink-soft">
-              $BUCKS is not backed by Starbucks shares and cannot be redeemed for SBUXx. It’s a
-              token, a website, and a button that buys coffee.
+            <h2 className="text-lg font-extrabold tracking-[-0.02em] text-ink">What we are not</h2>
+            <p className="mt-4 text-[1.05rem] leading-relaxed text-ink">
+              $BUCKS is not Starbucks stock. SBUXx is someone else’s tokenized-share product.
+              Holding $BUCKS does not mean you own Starbucks shares, and it cannot be redeemed
+              for SBUXx.
             </p>
           </GlassCard>
         </Reveal>

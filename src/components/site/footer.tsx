@@ -9,13 +9,14 @@ export function Footer() {
         <div className="mt-10 grid gap-10 md:grid-cols-[1.4fr_1fr]">
           <div>
             <p className="text-lg font-extrabold tracking-[-0.02em] text-ink">$BUCKS</p>
-            <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-ink-soft">
-              $BUCKS is a community project. It is not affiliated with or endorsed by Starbucks
-              Corporation. Starbucks is a trademark of its owner. SBUXx is a third-party token.
+            <p className="mt-4 max-w-xl text-[0.9375rem] leading-relaxed text-ink">
+              $BUCKS is partnered with Starbucks. Buy a real Starbucks gift card with crypto, or
+              send one as a link. Starbucks® is a trademark of Starbucks Corporation. SBUXx is a
+              third-party token.
             </p>
-            <p className="mt-3 max-w-xl text-[0.8125rem] leading-relaxed text-ink-soft">
+            <p className="mt-3 max-w-xl text-[0.875rem] leading-relaxed text-ink-soft">
               Holding $BUCKS does not mean you own Starbucks stock, and it cannot be swapped 1:1
-              for SBUXx. Gift cards come from a third-party seller. This is not financial advice.
+              for SBUXx. This is not financial advice.
             </p>
           </div>
 

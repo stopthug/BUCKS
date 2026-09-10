@@ -6,9 +6,10 @@ import { ConnectButton } from "@/components/wallet/connect-button";
 export function ConnectPrompt() {
   return (
     <GlassCard className="p-10 text-center">
-      <h2 className="text-xl font-medium tracking-[-0.02em] text-ink">Connect your wallet</h2>
-      <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
-        Purchases and gifts are tied to the wallet that paid. Sign a message — that’s the login.
+      <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">See your purchases</h2>
+      <p className="mx-auto mt-3 max-w-sm text-[1.05rem] leading-relaxed text-ink">
+        Purchases are tied to the wallet that paid. Approve a signature to view them — that’s the
+        login. Checkout itself doesn’t need this.
       </p>
       <div className="mt-7 flex justify-center">
         <ConnectButton size="md" />

@@ -24,8 +24,8 @@ export default async function GiftPage({ searchParams }: PageProps<"/gift">) {
           <h1 className="font-display mt-4 text-[clamp(2.25rem,8vw,4rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             Send someone a coffee.
           </h1>
-          <p className="mx-auto mt-5 max-w-sm text-[1.05rem] leading-relaxed text-ink-soft">
-            You pay. They get a link. That’s the whole gift.
+          <p className="mx-auto mt-5 max-w-sm text-[1.125rem] leading-relaxed text-ink">
+            You pay. They get a Starbucks gift card link. They don’t need a wallet to open it.
           </p>
         </header>
       </Reveal>

@@ -24,8 +24,8 @@ export default async function CoffeePage({ searchParams }: PageProps<"/coffee">)
           <h1 className="font-display mt-4 text-[clamp(2.4rem,8vw,4.25rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             Pick your card.
           </h1>
-          <p className="mx-auto mt-5 max-w-md text-[1.05rem] leading-relaxed text-ink-soft">
-            Choose a value, pay with your wallet, get the code. No platform fee.
+          <p className="mx-auto mt-5 max-w-md text-[1.125rem] leading-relaxed text-ink">
+            Partnered with Starbucks. Choose a value, pay in crypto, get the code. No platform fee.
           </p>
         </header>
       </Reveal>

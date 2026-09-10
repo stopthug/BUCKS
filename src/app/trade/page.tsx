@@ -50,15 +50,15 @@ export default async function TradePage() {
           <GlassCard className="p-8">
             <p className="label-mono">Please read</p>
             <ul className="mt-5 space-y-4 text-[0.9375rem] leading-relaxed text-ink-soft">
-              <li>$BUCKS is a community project. Starbucks did not create or endorse it.</li>
+              <li>$BUCKS is partnered with Starbucks for gift cards. The token itself is not Starbucks stock.</li>
               <li>
                 $BUCKS is not backed by Starbucks shares. Trading against SBUXx does not mean you
                 can redeem $BUCKS for stock.
               </li>
               <li>SBUXx is run by someone else. Their rules, not ours.</li>
               <li>
-                You can pay for a gift card with $BUCKS, SBUXx, SOL, or USDC because we can price
-                them — not because of any deal with Starbucks.
+                You can pay for a gift card with $BUCKS, SBUXx, SOL, or USDC because we price them
+                at checkout.
               </li>
             </ul>
           </GlassCard>

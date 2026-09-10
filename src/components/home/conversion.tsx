@@ -27,8 +27,7 @@ export function Conversion() {
               spend Starbucks stock at Starbucks.
             </p>
             <p className="mt-4 max-w-sm text-center text-sm leading-relaxed text-cream-500">
-              an independent community project. not affiliated with, sponsored or endorsed by
-              Starbucks Corporation.
+              Partnered with Starbucks. Spend crypto on a real cup.
             </p>
           </div>
         </Reveal>

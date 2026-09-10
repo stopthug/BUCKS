@@ -4,9 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { DoodleBeanMark } from "@/components/home/doodle-cards";
+import { StarbucksMark } from "@/components/brand/starbucks-mark";
 import { ButtonLink } from "@/components/ui/button";
-import { ConnectButton } from "@/components/wallet/connect-button";
 import { cn } from "@/lib/cn";
 
 const LINKS = [
@@ -23,9 +22,14 @@ export function Header() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b-[3px] border-ink bg-foam">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <DoodleBeanMark className="h-8 w-6" />
-          <span className="text-[1.15rem] font-extrabold tracking-tight text-ink">$BUCKS</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <StarbucksMark className="size-9" />
+          <span className="flex flex-col leading-none">
+            <span className="text-[1.15rem] font-extrabold tracking-tight text-ink">$BUCKS</span>
+            <span className="text-[0.6rem] font-extrabold tracking-[0.12em] text-ink-soft uppercase">
+              Partnered with Starbucks
+            </span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -58,7 +62,6 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <ConnectButton className="hidden sm:inline-flex" />
           <ButtonLink href="/coffee" variant="primary" size="sm">
             Get a gift card
           </ButtonLink>
@@ -96,7 +99,7 @@ export function Header() {
       <div
         className={cn(
           "overflow-hidden border-t-[3px] border-ink bg-foam transition-all duration-300 ease-out md:hidden",
-          menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+          menuOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <div className="px-4 py-2">
@@ -110,9 +113,6 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="pb-3">
-            <ConnectButton size="md" className="w-full" />
-          </div>
         </div>
       </div>
     </header>

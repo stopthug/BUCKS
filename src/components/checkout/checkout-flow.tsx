@@ -11,7 +11,7 @@ import { PaymentSummary } from "@/components/checkout/summary";
 import { RevealCard } from "@/components/checkout/reveal-card";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { GlassCard, StatusDot } from "@/components/ui/glass";
-import { ConnectButton } from "@/components/wallet/connect-button";
+import { WalletSheet } from "@/components/wallet/connect-button";
 import { useWallet } from "@/components/wallet/wallet-provider";
 import {
   catalogNotice,
@@ -57,8 +57,8 @@ export function CheckoutFlow({
   mode: "purchase" | "gift";
   initialCardId?: string;
 }) {
-  const { status: walletStatus, address, signTransaction } = useWallet();
-  const connected = walletStatus === "connected" && Boolean(address);
+  const { address, canSign, signTransaction } = useWallet();
+  const [paySheetOpen, setPaySheetOpen] = useState(false);
 
   const categories = useMemo(() => groupOffersByCategory(menu.offers), [menu.offers]);
   const initialOffer = useMemo(
@@ -129,7 +129,9 @@ export function CheckoutFlow({
   }, [balances]);
 
   const requestQuote = useCallback(
-    async (target: MenuOffer, symbol: string) => {
+    async (target: MenuOffer, symbol: string, payer = address) => {
+      if (!payer) return;
+
       setBusy("quoting");
       setError(null);
       setQuote(null);
@@ -140,6 +142,7 @@ export function CheckoutFlow({
           cardId: target.cardId,
           asset: symbol,
           intent: mode,
+          walletAddress: payer,
           senderName: mode === "gift" ? senderName || null : null,
           message: mode === "gift" ? message || null : null,
         });
@@ -150,12 +153,14 @@ export function CheckoutFlow({
         setBusy(null);
       }
     },
-    [mode, senderName, message],
+    [mode, senderName, message, address],
   );
 
   const selectAsset = (symbol: string) => {
     setAssetSymbol(symbol);
-    if (offer) void requestQuote(offer, symbol);
+    setQuote(null);
+    if (canSign && address && offer) void requestQuote(offer, symbol, address);
+    else setPaySheetOpen(true);
   };
 
   const confirm = async () => {
@@ -264,7 +269,7 @@ export function CheckoutFlow({
               </h2>
               <p className="mt-2 text-sm text-ink-soft">
                 {menu.purchasable
-                  ? "Starbucks gift cards. Tap a value to continue."
+                  ? "Starbucks gift cards — partnered with Starbucks. Tap a value to continue."
                   : "These are the values we’ll sell. Checkout opens when stock is live."}
               </p>
 
@@ -330,8 +335,11 @@ export function CheckoutFlow({
                             faceValueUsd={entry.faceValueUsd}
                             seed={entry.cardId}
                           />
-                          <span className="mt-2 block px-1 text-sm font-semibold text-ink-soft">
-                            {formatUsd(BigInt(entry.providerPriceUsd))} at checkout
+                          <span className="mt-2 block px-1 text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">
+                            {value}
+                          </span>
+                          <span className="mt-0.5 block px-1 text-[0.9375rem] font-semibold text-ink">
+                            {formatUsd(BigInt(entry.providerPriceUsd))}
                           </span>
                         </button>
                       );
@@ -393,9 +401,9 @@ export function CheckoutFlow({
                   seed={offer.cardId}
                 />
                 <div className="glass-soft rounded-[1.2rem] px-4 py-3.5">
-                  <p className="text-[0.9375rem] font-bold text-ink">{offer.categoryName} gift card</p>
-                  <p className="text-xs text-ink-soft">{offer.name}</p>
-                  <p className="mt-2 text-xl font-extrabold tracking-[-0.02em] text-ink">
+                  <p className="text-[1.05rem] font-bold text-ink">{offer.categoryName} gift card</p>
+                  <p className="mt-1 text-sm font-semibold text-ink">{offer.name}</p>
+                  <p className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-ink">
                     {offer.faceValueUsd ? formatUsd(BigInt(offer.faceValueUsd)) : "—"}
                   </p>
                 </div>
@@ -403,8 +411,8 @@ export function CheckoutFlow({
 
               {!menu.purchasable ? (
                 <div className="glass-soft mt-7 rounded-sm p-5 text-center">
-                  <p className="text-[0.9375rem] text-ink">Checkout isn’t open yet.</p>
-                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-soft">
+                  <p className="text-[0.9375rem] font-semibold text-ink">Checkout isn’t open yet.</p>
+                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">
                     These are the Starbucks values we’ll sell. Payment opens once we can actually
                     send cards.
                   </p>
@@ -414,7 +422,7 @@ export function CheckoutFlow({
                     </ButtonLink>
                   </div>
                 </div>
-              ) : connected ? (
+              ) : (
                 <>
                   <div className="mt-7">
                     <p className="label-mono">Pay with</p>
@@ -439,41 +447,48 @@ export function CheckoutFlow({
                       <Button
                         className="mt-7 w-full"
                         size="lg"
-                        onClick={() => void confirm()}
+                        onClick={() => {
+                          if (!canSign) {
+                            setPaySheetOpen(true);
+                            return;
+                          }
+                          void confirm();
+                        }}
                         disabled={busy !== null}
                       >
                         {busy === "signing"
-                          ? "Check your wallet"
+                          ? "Approve in your wallet"
                           : mode === "gift"
-                            ? "Send coffee"
-                            : "Confirm in wallet"}
+                            ? "Pay and send"
+                            : "Pay"}
                       </Button>
 
                       <button
                         type="button"
-                        onClick={() => assetSymbol && offer && void requestQuote(offer, assetSymbol)}
-                        disabled={busy !== null}
-                        className="mt-3 w-full text-center text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
+                        onClick={() =>
+                          assetSymbol && offer && address && void requestQuote(offer, assetSymbol, address)
+                        }
+                        disabled={busy !== null || !address}
+                        className="mt-3 w-full text-center text-[0.8125rem] font-semibold text-ink-soft transition-colors hover:text-ink"
                       >
                         Refresh price
                       </button>
                     </div>
                   ) : null}
                 </>
-              ) : (
-                <div className="glass-soft mt-7 rounded-sm p-5 text-center">
-                  <p className="text-[0.9375rem] text-ink">Connect a wallet to continue.</p>
-                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-soft">
-                    You’ll sign a message so we know it’s yours. We never ask for a seed phrase.
-                  </p>
-                  <div className="mt-4 flex justify-center">
-                    <ConnectButton size="md" />
-                  </div>
-                </div>
               )}
 
               {error ? <ErrorNote error={error} /> : null}
             </GlassCard>
+            <WalletSheet
+              open={paySheetOpen}
+              onClose={() => setPaySheetOpen(false)}
+              title="Pay with your wallet"
+              body="Pick the wallet that will pay. You’ll approve the payment there — no separate login."
+              onConnected={(payer) => {
+                if (offer && assetSymbol) void requestQuote(offer, assetSymbol, payer);
+              }}
+            />
           </Panel>
         ) : null}
 

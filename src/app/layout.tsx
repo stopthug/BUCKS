@@ -25,17 +25,17 @@ const doodle = Caveat({
 
 export const metadata: Metadata = {
   title: {
-    default: "$BUCKS — buy a Starbucks card with crypto",
+    default: "$BUCKS — Starbucks gift cards, paid in crypto",
     template: "%s — $BUCKS",
   },
   description:
-    "Buy a real Starbucks gift card with $BUCKS, SBUXx, SOL, or USDC. Keep it, or send it as a gift.",
+    "Partnered with Starbucks. Buy a real gift card with $BUCKS, SBUXx, SOL, or USDC. Keep it, or send it as a gift.",
   openGraph: {
-    title: "$BUCKS — buy a Starbucks card with crypto",
-    description: "Pay with crypto. Get a real Starbucks card. Or send one as a link.",
+    title: "$BUCKS — Starbucks gift cards, paid in crypto",
+    description: "Partnered with Starbucks. Pay with crypto. Get a real card. Or send one as a link.",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "$BUCKS — buy a Starbucks card with crypto" },
+  twitter: { card: "summary_large_image", title: "$BUCKS — Starbucks gift cards, paid in crypto" },
   robots: { index: true, follow: true },
 };
 

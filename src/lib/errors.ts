@@ -6,7 +6,7 @@
 
 export const ERROR_COPY = {
   // Auth / session
-  unauthorized: "Connect your wallet to keep going.",
+  unauthorized: "Approve the payment in your wallet to keep going.",
   nonce_invalid: "That login request expired. Try connecting again.",
   signature_invalid: "We couldn’t verify that signature.",
   rate_limited: "Too many requests. Give it a second.",

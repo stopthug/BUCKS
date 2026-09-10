@@ -1,9 +1,9 @@
 import Link from "next/link";
 
+import { StarbucksMark, StarbucksPartner } from "@/components/brand/starbucks-mark";
 import { CardArt } from "@/components/cards/card-art";
 import {
   DoodleCardsIcon,
-  DoodleCupIcon,
   DoodleEnvelopeIcon,
   DoodleHeartIcon,
   DoodleTagIcon,
@@ -12,7 +12,6 @@ import { HeroFan } from "@/components/home/hero-fan";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/glass";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
-import { cn } from "@/lib/cn";
 import { errorCopy } from "@/lib/errors";
 import { catalogNotice, distinctDenominations, type CoffeeMenu } from "@/lib/menu";
 import { formatUsd } from "@/lib/money";
@@ -63,22 +62,19 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
 
           <div className="order-1 text-center lg:order-2">
             <Reveal>
-              <span className="mx-auto flex size-12 items-center justify-center text-ink">
-                <DoodleCupIcon />
-              </span>
-              <p className="label-mono mt-3">Starbucks gift cards</p>
+              <StarbucksPartner size="lg" />
             </Reveal>
 
             <Reveal delay={0.05}>
-              <h1 className="font-display mt-3 text-[clamp(2.4rem,6.5vw,4.25rem)] leading-[1.02] font-extrabold tracking-[-0.04em] text-ink">
+              <h1 className="font-display mt-5 text-[clamp(2.4rem,6.5vw,4.25rem)] leading-[1.05] font-extrabold tracking-[-0.04em] text-ink">
                 Gift the perfect cup
               </h1>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <p className="mx-auto mt-5 max-w-sm text-[1.05rem] leading-relaxed text-ink-soft">
-                A real Starbucks card. Paid with $BUCKS, SBUXx, SOL, or USDC. Keep it, or send the
-                link.
+              <p className="mx-auto mt-5 max-w-sm text-[1.125rem] leading-relaxed text-ink">
+                Official Starbucks gift cards, paid with $BUCKS, SBUXx, SOL, or USDC. Keep one, or
+                send the link.
               </p>
             </Reveal>
 
@@ -108,7 +104,7 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                 <way.icon />
               </span>
               <h2 className="mt-4 text-lg font-extrabold tracking-[-0.02em] text-ink">{way.title}</h2>
-              <p className="mx-auto mt-2 max-w-[16rem] text-sm leading-relaxed text-ink-soft">
+              <p className="mx-auto mt-2 max-w-[16rem] text-[0.9375rem] leading-relaxed text-ink">
                 {way.body}
               </p>
               <Link href={way.href} className="btn-doodle-ghost mt-5 inline-flex h-10 items-center rounded-[1.2rem] px-5">
@@ -121,6 +117,16 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
 
       <section className="bg-paper px-4 pb-16 sm:px-6">
         <div id="cards" className="relative mx-auto max-w-6xl">
+          <div className="mb-10 flex flex-col items-center text-center">
+            <StarbucksMark className="size-14" />
+            <h2 className="mt-4 text-[clamp(1.75rem,4vw,2.35rem)] font-extrabold tracking-[-0.03em] text-ink">
+              Starbucks gift cards
+            </h2>
+            <p className="mt-2 max-w-md text-[1.05rem] leading-relaxed text-ink">
+              Partnered with Starbucks. Pick a value — every card is a real code you can spend
+              in-store or in the app.
+            </p>
+          </div>
           {menu.available ? (
             <RevealGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {cards.map((offer, index) => {
@@ -134,12 +140,7 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                       href={`/coffee?card=${encodeURIComponent(offer.cardId)}`}
                       className="group block"
                     >
-                      <div
-                        className={cn(
-                          "relative transition-transform duration-300 group-hover:rotate-0",
-                          ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2"][index % 4],
-                        )}
-                      >
+                      <div className="relative transition-transform duration-300 group-hover:-translate-y-1">
                         <CardArt
                           alt={`${offer.categoryName} ${value} gift card`}
                           faceValueUsd={offer.faceValueUsd}
@@ -148,13 +149,15 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                           priority={index < 4}
                         />
                       </div>
-                      <div className="px-2 pt-3">
-                        <p className="text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">Starbucks</p>
-                        <div className="mt-1 flex items-center justify-between gap-3">
-                          <p className="text-sm text-ink-soft">
-                            {formatUsd(BigInt(offer.providerPriceUsd))} at checkout
+                      <div className="px-1 pt-4">
+                        <p className="text-xl font-extrabold tracking-[-0.03em] text-ink">
+                          {value} Starbucks card
+                        </p>
+                        <div className="mt-1.5 flex items-center justify-between gap-3">
+                          <p className="text-[0.9375rem] font-semibold text-ink">
+                            {formatUsd(BigInt(offer.providerPriceUsd))}
                           </p>
-                          <span className="inline-flex items-center gap-1.5 text-[0.6875rem] text-forest-500">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-600">
                             <StatusDot />
                             {menu.purchasable
                               ? offer.stock > 20

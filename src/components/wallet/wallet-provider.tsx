@@ -55,9 +55,14 @@ interface WalletContextValue {
   address: string | null;
   walletName: string | null;
   error: string | null;
-  /** Resolves true once the wallet is connected and signed in. */
-  connect: (wallet: Wallet) => Promise<boolean>;
+  /**
+   * Opens the wallet. Pass `{ authenticate: true }` on the account page so we
+   * get a signed login. Checkout only needs the address — payment is the proof.
+   */
+  connect: (wallet: Wallet, options?: { authenticate?: boolean }) => Promise<string | null>;
   disconnect: () => Promise<void>;
+  /** True only when the in-page wallet can actually sign a transaction. */
+  canSign: boolean;
   /** Signs a base64 transaction and returns the signed bytes as base64. */
   signTransaction: (base64Transaction: string) => Promise<string>;
   clearError: () => void;
@@ -127,48 +132,52 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const connect = useCallback(async (target: Wallet): Promise<boolean> => {
-    setError(null);
+  const connect = useCallback(
+    async (target: Wallet, options?: { authenticate?: boolean }): Promise<string | null> => {
+      setError(null);
 
-    if (!supportsSolana(target)) {
-      setStatus("unsupported");
-      setError("that wallet cannot sign Solana transactions for this site.");
-      return false;
-    }
-
-    setStatus("connecting");
-
-    try {
-      const features = target.features as Record<string, unknown>;
-      const connectFeature = features["standard:connect"] as {
-        connect: () => Promise<{ accounts: readonly WalletAccount[] }>;
-      };
-
-      const { accounts } = await connectFeature.connect();
-      const solanaAccount =
-        accounts.find((entry) => entry.chains.includes(SOLANA_MAINNET)) ?? accounts[0];
-
-      if (!solanaAccount) {
-        setStatus("disconnected");
-        setError("no account was shared by that wallet.");
-        return false;
+      if (!supportsSolana(target)) {
+        setStatus("unsupported");
+        setError("that wallet cannot sign Solana transactions for this site.");
+        return null;
       }
 
-      // Prove ownership to the server: nonce, sign, verify, session cookie.
-      setStatus("signing-in");
-      await signIn(target, solanaAccount);
+      setStatus("connecting");
 
-      setWallet(target);
-      setAccount(solanaAccount);
-      setAddress(solanaAccount.address);
-      setStatus("connected");
-      return true;
-    } catch (cause) {
-      setStatus("disconnected");
-      setError(describe(cause));
-      return false;
-    }
-  }, []);
+      try {
+        const features = target.features as Record<string, unknown>;
+        const connectFeature = features["standard:connect"] as {
+          connect: () => Promise<{ accounts: readonly WalletAccount[] }>;
+        };
+
+        const { accounts } = await connectFeature.connect();
+        const solanaAccount =
+          accounts.find((entry) => entry.chains.includes(SOLANA_MAINNET)) ?? accounts[0];
+
+        if (!solanaAccount) {
+          setStatus("disconnected");
+          setError("no account was shared by that wallet.");
+          return null;
+        }
+
+        if (options?.authenticate) {
+          setStatus("signing-in");
+          await signIn(target, solanaAccount);
+        }
+
+        setWallet(target);
+        setAccount(solanaAccount);
+        setAddress(solanaAccount.address);
+        setStatus("connected");
+        return solanaAccount.address;
+      } catch (cause) {
+        setStatus("disconnected");
+        setError(describe(cause));
+        return null;
+      }
+    },
+    [],
+  );
 
   const disconnect = useCallback(async () => {
     const features = (wallet?.features ?? {}) as Record<string, unknown>;
@@ -190,7 +199,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const signTransaction = useCallback(
     async (base64Transaction: string): Promise<string> => {
       if (!wallet || !account) {
-        throw new Error("connect a wallet first.");
+        throw new Error("open your wallet to pay.");
       }
 
       const feature = (wallet.features as unknown as SolanaSignTransactionFeature)[
@@ -220,9 +229,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       connect,
       disconnect,
       signTransaction,
+      canSign: Boolean(wallet && account),
       clearError: () => setError(null),
     }),
-    [wallets, status, address, wallet, error, connect, disconnect, signTransaction],
+    [wallets, status, address, wallet, account, error, connect, disconnect, signTransaction],
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

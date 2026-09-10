@@ -1,10 +1,9 @@
-import { cn } from "@/lib/cn";
 import { doodleKindForOffer, DoodleThumb } from "@/components/home/doodle-cards";
+import { cn } from "@/lib/cn";
 import { formatUsd } from "@/lib/money";
 
 /**
- * Gift-card cover. Always a unique cozy doodle — never a provider photo or a
- * repeated green rectangle. Kind is chosen from face value, then a seed.
+ * Gift-card cover. The siren is drawn into the doodle itself.
  */
 export function CardArt({
   alt,

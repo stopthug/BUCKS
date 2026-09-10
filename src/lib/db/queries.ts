@@ -285,6 +285,12 @@ export async function getQuoteForUser(quoteId: string, userId: string): Promise<
   return mapQuote(row);
 }
 
+export async function getQuote(quoteId: string): Promise<QuoteRow> {
+  const row = await queryOne(`SELECT * FROM payment_quotes WHERE id = $1`, [quoteId]);
+  if (!row) throw new AppError("not_found", { detail: "quote not found" });
+  return mapQuote(row);
+}
+
 /**
  * Claims a quote for settlement. Atomic, so two concurrent confirmations of
  * the same quote cannot both proceed to buy a card.

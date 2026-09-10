@@ -10,7 +10,7 @@ const STEPS = [
   {
     number: "2",
     title: "Pay with crypto",
-    body: "Connect a wallet. Pay with $BUCKS, SBUXx, SOL, or USDC. No platform fee.",
+    body: "Pay with $BUCKS, SBUXx, SOL, or USDC. No platform fee. Your wallet opens when you pay.",
   },
   {
     number: "3",
@@ -29,8 +29,8 @@ export function Utility() {
             <h2 className="font-display mt-3 text-[clamp(2rem,5.5vw,3.25rem)] leading-[1.08] font-extrabold tracking-[-0.03em] text-ink">
               Three steps. That’s it.
             </h2>
-            <p className="mt-4 max-w-lg text-[1.05rem] leading-relaxed text-ink-soft">
-              Buy a Starbucks gift card with your wallet, or send one to a friend.
+            <p className="mt-4 max-w-lg text-[1.125rem] leading-relaxed text-ink">
+              Partnered with Starbucks. Buy a gift card with crypto, or send one to a friend.
             </p>
           </div>
         </Reveal>
@@ -43,7 +43,7 @@ export function Utility() {
                 <p className="mt-5 text-lg leading-snug font-medium tracking-[-0.02em] text-ink">
                   {step.title}
                 </p>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-soft">{step.body}</p>
+                <p className="mt-3 text-[1.05rem] leading-relaxed text-ink">{step.body}</p>
               </GlassCard>
             </RevealItem>
           ))}
@@ -70,7 +70,7 @@ export function Statement() {
               />
               <Column
                 title="The card"
-                body="You get a real Starbucks gift card. Not a fake code, not a screenshot."
+                body="You get a real Starbucks gift card — we’re partnered with Starbucks. Not a fake code, not a screenshot."
               />
               <Column
                 title="The payment"

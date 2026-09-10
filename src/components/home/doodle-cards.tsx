@@ -26,7 +26,8 @@ function Spark({ x, y }: { x: number; y: number }) {
   );
 }
 
-function Note({ x, y, children }: { x: number; y: number; children: string }) {
+function Note({ x, y, children }: { x: number; y: number; children?: string }) {
+  if (!children) return null;
   return (
     <text x={x} y={y} fill="#2c2416" fontFamily="var(--font-caveat), cursive" fontSize={42}>
       {children}
@@ -38,15 +39,45 @@ function ValueMark({ label }: { label?: string }) {
   if (!label) return null;
   return (
     <text
-      x={560}
-      y={338}
+      x={548}
+      y={334}
       textAnchor="end"
       fill="#2c2416"
-      fontFamily="var(--font-caveat), cursive"
-      fontSize={48}
+      fontFamily="var(--font-nunito), ui-rounded, sans-serif"
+      fontWeight={800}
+      fontSize={42}
     >
       {label}
     </text>
+  );
+}
+
+/** Siren drawn onto the card like a sticker, not an HTML overlay. */
+function SirenStamp({
+  x,
+  y,
+  size = 82,
+  rotate = -8,
+}: {
+  x: number;
+  y: number;
+  size?: number;
+  rotate?: number;
+}) {
+  const r = size / 2;
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rotate} ${r} ${r})`}>
+      <ellipse
+        cx={r}
+        cy={r}
+        rx={r - 1}
+        ry={r + 1.4}
+        fill="#fff8ee"
+        stroke="#2c2416"
+        strokeWidth="3.2"
+      />
+      <image href="/brand/starbucks.svg" x={5} y={5} width={size - 10} height={size - 10} />
+    </g>
   );
 }
 
@@ -73,8 +104,8 @@ export function DoodleCupCard({ note = "for you", valueLabel }: DoodleProps = {}
       <path d="M278 164c4-26 20-22 16-44" fill="none" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
       <path d="M318 160c0-28 18-24 14-46" fill="none" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
       <path d="M354 168c6-22 18-18 14-40" fill="none" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
-      <Spark x={478} y={118} />
       <Spark x={142} y={278} />
+      <SirenStamp x={488} y={70} rotate={-9} />
       <Note x={64} y={118}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -112,7 +143,7 @@ export function DoodleBeanCard({ note = "sip sip", valueLabel }: DoodleProps = {
         strokeWidth="4"
         strokeLinecap="round"
       />
-      <Spark x={520} y={104} />
+      <SirenStamp x={498} y={68} rotate={7} />
       <Note x={58} y={114}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -160,6 +191,7 @@ export function DoodleTwoCupsCard({ note = "on me", valueLabel }: DoodleProps = 
         strokeLinecap="round"
       />
       <Spark x={128} y={116} />
+      <SirenStamp x={500} y={66} rotate={-6} />
       <Note x={56} y={112}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -194,8 +226,8 @@ export function DoodleGiftCard({ note = "yours", valueLabel }: DoodleProps = {})
         strokeWidth="5"
         strokeLinecap="round"
       />
-      <Spark x={504} y={116} />
       <Spark x={136} y={298} />
+      <SirenStamp x={496} y={66} rotate={8} />
       <Note x={58} y={108}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -228,7 +260,7 @@ export function DoodleHeartSteamCard({ note = "warm", valueLabel }: DoodleProps 
         strokeLinejoin="round"
       />
       <Spark x={150} y={120} />
-      <Spark x={490} y={300} />
+      <SirenStamp x={498} y={68} rotate={-7} />
       <Note x={62} y={114}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -247,8 +279,8 @@ export function DoodleMoonCard({ note = "later", valueLabel }: DoodleProps = {})
         strokeWidth="5"
         strokeLinejoin="round"
       />
-      <Spark x={500} y={108} />
       <Spark x={388} y={96} />
+      <SirenStamp x={72} y={74} rotate={6} size={76} />
       <path
         d="M228 214c2-8 150-8 156 8v84c-6 42-148 46-156 4V214Z"
         fill="#d7e2d0"
@@ -264,7 +296,7 @@ export function DoodleMoonCard({ note = "later", valueLabel }: DoodleProps = {})
       />
       <path d="M268 194c2-18 14-16 12-32" fill="none" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
       <path d="M308 190c0-20 14-16 12-34" fill="none" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
-      <Note x={60} y={114}>{note}</Note>
+      <Note x={168} y={114}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
   );
@@ -326,7 +358,7 @@ export function DoodleThumb({
 
   return (
     <div className={className}>
-      <Card note={note} valueLabel={valueLabel} />
+      <Card note={note ?? ""} valueLabel={valueLabel} />
     </div>
   );
 }
