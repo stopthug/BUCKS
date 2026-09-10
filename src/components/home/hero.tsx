@@ -5,7 +5,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { GlassPill, StatusDot } from "@/components/ui/glass";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
 import { errorCopy } from "@/lib/errors";
-import { distinctDenominations, type CoffeeMenu } from "@/lib/menu";
+import { catalogNotice, distinctDenominations, type CoffeeMenu } from "@/lib/menu";
 import { formatUsd } from "@/lib/money";
 
 /**
@@ -14,6 +14,7 @@ import { formatUsd } from "@/lib/money";
  */
 export function Hero({ menu }: { menu: CoffeeMenu }) {
   const cards = distinctDenominations(menu.offers).slice(0, 4);
+  const notice = catalogNotice(menu);
 
   return (
     <section className="relative px-4 pt-32 pb-8 sm:px-6 sm:pt-40">
@@ -89,7 +90,11 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                           </p>
                           <span className="inline-flex items-center gap-1.5 text-[0.6875rem] text-forest-300">
                             <StatusDot />
-                            {offer.stock > 20 ? "in stock" : `${offer.stock} left`}
+                            {menu.purchasable
+                              ? offer.stock > 20
+                                ? "in stock"
+                                : `${offer.stock} left`
+                              : "preview"}
                           </span>
                         </div>
                       </div>
@@ -108,9 +113,9 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             </div>
           )}
 
-          {menu.sandbox ? (
+          {notice ? (
             <p className="mt-5 text-center font-mono text-[0.6875rem] tracking-[0.14em] uppercase text-crema-300">
-              development fixture — not live provider data
+              {notice}
             </p>
           ) : null}
         </div>

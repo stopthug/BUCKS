@@ -237,6 +237,12 @@ export async function getLiveOffer(
   categoryId: string,
   cardId: string,
 ): Promise<CoffeeOffer> {
+  if (categoryId.startsWith("preview-") || cardId.startsWith("preview-")) {
+    throw new AppError("starbucks_unavailable", {
+      detail: "preview catalog is not purchasable",
+    });
+  }
+
   const { categoryName, imageUrl, offers } = await fetchOffers(categoryId);
 
   if (!STARBUCKS_PATTERN.test(categoryName)) {

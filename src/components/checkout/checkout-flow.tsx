@@ -13,7 +13,13 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { GlassCard, StatusDot } from "@/components/ui/glass";
 import { ConnectButton } from "@/components/wallet/connect-button";
 import { useWallet } from "@/components/wallet/wallet-provider";
-import { distinctDenominations, groupOffersByCategory, type CoffeeMenu, type MenuOffer } from "@/lib/menu";
+import {
+  catalogNotice,
+  distinctDenominations,
+  groupOffersByCategory,
+  type CoffeeMenu,
+  type MenuOffer,
+} from "@/lib/menu";
 import {
   ApiError,
   get,
@@ -81,6 +87,7 @@ export function CheckoutFlow({
   const [busy, setBusy] = useState<null | "quoting" | "signing" | "settling">(null);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
 
+  const notice = catalogNotice(menu);
   const selectedCategory = categories.find((entry) => entry.categoryId === categoryId) ?? null;
   const denominations = useMemo(
     () => distinctDenominations(selectedCategory?.offers ?? []),
@@ -233,9 +240,9 @@ export function CheckoutFlow({
 
   return (
     <div className="mx-auto max-w-2xl">
-      {menu.sandbox ? (
+      {notice ? (
         <p className="mb-6 rounded-2xl border border-crema-300/30 bg-crema-300/8 px-4 py-3 text-center font-mono text-[0.6875rem] tracking-[0.14em] uppercase text-crema-300">
-          development fixture — not live provider data
+          {notice}
         </p>
       ) : null}
 
@@ -256,9 +263,11 @@ export function CheckoutFlow({
                     : "choose your coffee."}
               </h2>
               <p className="mt-2 text-sm text-cream-500">
-                {selectedCategory
-                  ? "Starbucks cards from live inventory. pick a value."
-                  : "live Starbucks cards. tap one to pick an amount."}
+                {menu.purchasable
+                  ? selectedCategory
+                    ? "Starbucks cards from live inventory. pick a value."
+                    : "live Starbucks cards. tap one to pick an amount."
+                  : "Starbucks values we'll sell. checkout opens when inventory is live."}
               </p>
 
               {!selectedCategory ? (
@@ -394,7 +403,20 @@ export function CheckoutFlow({
                 </p>
               </div>
 
-              {connected ? (
+              {!menu.purchasable ? (
+                <div className="glass-soft mt-7 rounded-2xl p-5 text-center">
+                  <p className="text-[0.9375rem] text-cream-100">checkout isn&rsquo;t live yet.</p>
+                  <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-cream-500">
+                    these are the Starbucks values we&rsquo;ll sell. payment opens once the card
+                    provider is connected.
+                  </p>
+                  <div className="mt-4 flex justify-center">
+                    <ButtonLink href="/" variant="secondary" size="md">
+                      back to the counter
+                    </ButtonLink>
+                  </div>
+                </div>
+              ) : connected ? (
                 <>
                   <div className="mt-7">
                     <p className="label-mono">pay with</p>

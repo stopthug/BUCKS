@@ -58,7 +58,7 @@ const schema = z.object({
    * Development-only escape hatch. When enabled (and NODE_ENV !== production)
    * the FazerCards client answers from an isolated local fixture instead of
    * the live provider, so the UI can be exercised without a reseller account.
-   * It never activates in production.
+   * Ignored in production — never activates checkout against fake inventory.
    */
   FAZER_DEV_MOCK: z
     .enum(["0", "1"])
@@ -83,7 +83,9 @@ function load(): ServerEnv {
   }
 
   if (parsed.data.NODE_ENV === "production" && parsed.data.FAZER_DEV_MOCK) {
-    throw new Error("FAZER_DEV_MOCK cannot be enabled in production.");
+    // Vercel copies of .env.local often still have FAZER_DEV_MOCK=1. Ignore it
+    // rather than refusing to boot the whole site.
+    parsed.data.FAZER_DEV_MOCK = false;
   }
 
   return parsed.data;

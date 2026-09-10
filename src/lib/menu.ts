@@ -28,9 +28,11 @@ export interface MenuOffer {
 
 export interface CoffeeMenu {
   available: boolean;
+  /** False when the cards are a preview and checkout cannot fulfil yet. */
+  purchasable: boolean;
   reason: ErrorCode | null;
   offers: MenuOffer[];
-  /** True when served from the local development fixture. */
+  /** True when served from a fixture or preview catalog. */
   sandbox: boolean;
 }
 
@@ -54,6 +56,13 @@ export function distinctDenominations(offers: MenuOffer[]): MenuOffer[] {
   }
 
   return result;
+}
+
+/** Banner shown when the catalog is a fixture or a non-purchasable preview. */
+export function catalogNotice(menu: CoffeeMenu): string | null {
+  if (!menu.sandbox) return null;
+  if (!menu.purchasable) return "preview catalog — checkout opens when inventory is live";
+  return "development fixture — not live provider data";
 }
 
 export function groupOffersByCategory(offers: MenuOffer[]): MenuCategory[] {
