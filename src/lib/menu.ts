@@ -58,11 +58,27 @@ export function distinctDenominations(offers: MenuOffer[]): MenuOffer[] {
   return result;
 }
 
-/** Banner shown when the catalog is a fixture or a non-purchasable preview. */
+/** Banner shown only for the local fixture / missing-key preview. */
 export function catalogNotice(menu: CoffeeMenu): string | null {
   if (!menu.sandbox) return null;
   if (!menu.purchasable) return "Sample cards — buying isn’t open yet.";
   return "Test catalog — not live stock.";
+}
+
+export function stockLabel(stock: number): string {
+  if (stock <= 0) return "Out of stock";
+  if (stock > 20) return "In stock";
+  return `${stock} left`;
+}
+
+/** Stable seed so two SKUs never share a doodle, even at the same face value. */
+export function doodleSeedForOffer(offer: {
+  categoryId: string;
+  cardId: string;
+  name: string;
+  categoryName: string;
+}): string {
+  return `${offer.categoryId}:${offer.cardId}:${offer.categoryName}:${offer.name}`;
 }
 
 export function groupOffersByCategory(offers: MenuOffer[]): MenuCategory[] {

@@ -9,6 +9,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS users (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -74,10 +75,11 @@ CREATE TABLE IF NOT EXISTS provider_products (
 
 -- A short-lived, server-authored price. The client cannot alter any amount:
 -- confirmation re-reads the quote row and verifies against these numbers.
+-- wallet_address is optional: wallet-free checkout pays the treasury from any wallet.
 CREATE TABLE IF NOT EXISTS payment_quotes (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id               UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  wallet_address        TEXT NOT NULL,
+  wallet_address        TEXT,
   product_id            UUID NOT NULL REFERENCES provider_products(id),
   intent                TEXT NOT NULL CHECK (intent IN ('purchase', 'gift')),
   payment_asset         TEXT NOT NULL REFERENCES supported_assets(symbol),
@@ -92,6 +94,8 @@ CREATE TABLE IF NOT EXISTS payment_quotes (
   unsigned_transaction  TEXT,
   sender_name           TEXT,
   gift_message          TEXT,
+  receipt_email         TEXT,
+  payment_memo          TEXT,
   expires_at            TIMESTAMPTZ NOT NULL,
   consumed_at           TIMESTAMPTZ,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -104,7 +108,7 @@ CREATE TABLE IF NOT EXISTS payments (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   quote_id        UUID NOT NULL REFERENCES payment_quotes(id),
   user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  wallet_address  TEXT NOT NULL,
+  wallet_address  TEXT,
   asset           TEXT NOT NULL,
   mint            TEXT NOT NULL,
   amount          BIGINT NOT NULL,
@@ -163,6 +167,18 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX IF NOT EXISTS orders_user_id_created_at_idx ON orders(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS orders_status_idx ON orders(status);
 CREATE INDEX IF NOT EXISTS orders_fazercards_order_id_idx ON orders(fazercards_order_id);
+CREATE INDEX IF NOT EXISTS orders_quote_id_idx ON orders(quote_id);
+
+-- ---------------------------------------------------------------------------
+-- Additive upgrades for existing databases (CREATE TABLE IF NOT EXISTS above
+-- does not alter already-created tables).
+-- ---------------------------------------------------------------------------
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE payment_quotes ALTER COLUMN wallet_address DROP NOT NULL;
+ALTER TABLE payment_quotes ADD COLUMN IF NOT EXISTS receipt_email TEXT;
+ALTER TABLE payment_quotes ADD COLUMN IF NOT EXISTS payment_memo TEXT;
+ALTER TABLE payments ALTER COLUMN wallet_address DROP NOT NULL;
 
 -- ---------------------------------------------------------------------------
 -- Gifting

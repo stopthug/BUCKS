@@ -186,6 +186,180 @@ function ownedBalance(balances: readonly TokenBalance[], owner: string, mint: st
     .reduce((total, balance) => total + BigInt(balance.uiTokenAmount.amount), 0n);
 }
 
+const MEMO_PROGRAM_IDS = new Set([
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
+]);
+
+export interface IncomingTransferRequest {
+  signature: string;
+  treasuryOwner: string;
+  /** wSOL mint for native SOL; otherwise the SPL mint. */
+  expectedMint: string;
+  expectedAmount: bigint;
+  native: boolean;
+  /** `bucks:{quoteId}`. Matched when present; omitted memos are allowed. */
+  expectedMemo: string | null;
+}
+
+export interface IncomingTransferResult {
+  signature: string;
+  slot: number;
+  receivedAmount: bigint;
+  payer: string | null;
+  feeLamports: bigint;
+  blockTime: number | null;
+}
+
+/**
+ * Confirms an incoming native SOL or SPL transfer to the treasury. Used by
+ * wallet-free checkout: the payer is whoever sent the funds, not a wallet that
+ * signed inside this site, and USDC conversion is not required at pay time.
+ */
+export async function verifyIncomingTransfer(
+  request: IncomingTransferRequest,
+): Promise<IncomingTransferResult> {
+  const transaction = await fetchTransaction(request.signature);
+
+  if (!transaction) {
+    throw new AppError("transaction_not_found", { detail: request.signature });
+  }
+
+  if (transaction.meta?.err) {
+    throw new AppError("transaction_failed", {
+      detail: `onchain error: ${JSON.stringify(transaction.meta.err)}`,
+    });
+  }
+
+  if (!matchesIncomingTransfer(transaction, request)) {
+    throw new AppError("payment_amount_mismatch", {
+      detail: "treasury did not receive the quoted amount of the quoted asset",
+    });
+  }
+
+  return {
+    signature: request.signature,
+    slot: transaction.slot,
+    receivedAmount: incomingAmount(transaction, request),
+    payer: extractPayer(transaction, request.treasuryOwner, request.expectedMint, request.native),
+    feeLamports: BigInt(transaction.meta?.fee ?? 0),
+    blockTime: transaction.blockTime ?? null,
+  };
+}
+
+export function matchesIncomingTransfer(
+  transaction: ParsedTransactionWithMeta,
+  request: Omit<IncomingTransferRequest, "signature">,
+): boolean {
+  if (transaction.meta?.err) return false;
+  if (incomingAmount(transaction, request) !== request.expectedAmount) return false;
+  return memoCompatible(extractMemo(transaction), request.expectedMemo);
+}
+
+function incomingAmount(
+  transaction: ParsedTransactionWithMeta,
+  request: Pick<IncomingTransferRequest, "treasuryOwner" | "expectedMint" | "native">,
+): bigint {
+  const meta = transaction.meta;
+  if (!meta) return 0n;
+
+  if (request.native) {
+    const index = accountIndex(transaction, request.treasuryOwner);
+    if (index === null) return 0n;
+    const pre = BigInt(meta.preBalances[index] ?? 0);
+    const post = BigInt(meta.postBalances[index] ?? 0);
+    return post > pre ? post - pre : 0n;
+  }
+
+  const pre = ownedBalance(meta.preTokenBalances ?? [], request.treasuryOwner, request.expectedMint);
+  const post = ownedBalance(meta.postTokenBalances ?? [], request.treasuryOwner, request.expectedMint);
+  return post > pre ? post - pre : 0n;
+}
+
+function extractPayer(
+  transaction: ParsedTransactionWithMeta,
+  treasuryOwner: string,
+  mint: string,
+  native: boolean,
+): string | null {
+  const meta = transaction.meta;
+  if (!meta) return null;
+
+  if (native) {
+    const keys = transaction.transaction.message.accountKeys;
+    for (const [index, key] of keys.entries()) {
+      const address = key.pubkey.toBase58();
+      if (address === treasuryOwner) continue;
+      const pre = BigInt(meta.preBalances[index] ?? 0);
+      const post = BigInt(meta.postBalances[index] ?? 0);
+      if (post < pre) return address;
+    }
+  } else {
+    const owners = new Set(
+      [...(meta.preTokenBalances ?? []), ...(meta.postTokenBalances ?? [])]
+        .filter((balance) => balance.mint === mint && balance.owner && balance.owner !== treasuryOwner)
+        .map((balance) => balance.owner as string),
+    );
+    for (const owner of owners) {
+      const before = ownedBalance(meta.preTokenBalances ?? [], owner, mint);
+      const after = ownedBalance(meta.postTokenBalances ?? [], owner, mint);
+      if (after < before) return owner;
+    }
+  }
+
+  const signer = transaction.transaction.message.accountKeys.find(
+    (key) => key.signer && key.pubkey.toBase58() !== treasuryOwner,
+  );
+  return signer?.pubkey.toBase58() ?? null;
+}
+
+function extractMemo(transaction: ParsedTransactionWithMeta): string | null {
+  const instructions = [
+    ...transaction.transaction.message.instructions,
+    ...(transaction.meta?.innerInstructions ?? []).flatMap((entry) => entry.instructions),
+  ];
+
+  for (const instruction of instructions) {
+    const programId = instruction.programId.toBase58();
+    if (!MEMO_PROGRAM_IDS.has(programId) && !("program" in instruction && instruction.program === "spl-memo")) {
+      continue;
+    }
+
+    if ("parsed" in instruction) {
+      if (typeof instruction.parsed === "string" && instruction.parsed.trim()) {
+        return instruction.parsed.trim();
+      }
+      if (instruction.parsed && typeof instruction.parsed === "object") {
+        const record = instruction.parsed as { memo?: unknown };
+        if (typeof record.memo === "string" && record.memo.trim()) return record.memo.trim();
+      }
+    }
+
+    if ("data" in instruction && typeof instruction.data === "string") {
+      try {
+        const decoded = Buffer.from(instruction.data, "base64").toString("utf8").trim();
+        if (decoded) return decoded;
+      } catch {
+        // Ignore undecodable instruction data.
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Exact unique amounts identify the quote. A matching memo is extra confirmation.
+ * A different `bucks:` memo means this transfer belongs to another quote.
+ */
+function memoCompatible(found: string | null, expected: string | null): boolean {
+  if (!expected) return true;
+  if (!found) return true;
+  if (found === expected || found.includes(expected)) return true;
+  if (found.startsWith("bucks:") && found !== expected) return false;
+  return true;
+}
+
 /** Guards against a malformed treasury configuration at startup. */
 export function assertValidAddress(address: string, label: string): PublicKey {
   try {

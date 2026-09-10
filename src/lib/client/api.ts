@@ -84,9 +84,15 @@ export interface BalancesResponse {
 export interface QuoteResponse {
   quoteId: string;
   expiresAt: string;
-  transaction: string;
+  createdAt: string;
   asset: { symbol: string; label: string; decimals: number };
   payAmount: string;
+  payAmountUi: string;
+  treasuryAddress: string;
+  paymentMemo: string;
+  solanaPayUrl: string;
+  qrDataUrl: string;
+  receiptEmail: string | null;
   card: {
     name: string;
     categoryName: string;
@@ -110,6 +116,10 @@ export interface SettlementResponse {
   signature: string;
   claimUrl?: string;
 }
+
+export type WatchResponse =
+  | { watching: true }
+  | (SettlementResponse & { watching: false });
 
 export interface RedemptionResponse {
   cards: Array<{

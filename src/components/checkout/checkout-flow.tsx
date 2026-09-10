@@ -1,22 +1,21 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CardArt } from "@/components/cards/card-art";
-import { AssetPicker, type AssetOption } from "@/components/checkout/asset-picker";
+import { CartPanel } from "@/components/checkout/cart-panel";
 import { GiftFields } from "@/components/checkout/gift-fields";
-import { PaymentSummary } from "@/components/checkout/summary";
+import { PayPanel } from "@/components/checkout/pay-panel";
 import { RevealCard } from "@/components/checkout/reveal-card";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { GlassCard, StatusDot } from "@/components/ui/glass";
-import { WalletSheet } from "@/components/wallet/connect-button";
-import { useWallet } from "@/components/wallet/wallet-provider";
 import {
   catalogNotice,
   distinctDenominations,
+  doodleSeedForOffer,
   groupOffersByCategory,
+  stockLabel,
   type CoffeeMenu,
   type MenuOffer,
 } from "@/lib/menu";
@@ -24,29 +23,25 @@ import {
   ApiError,
   get,
   post,
-  type BalancesResponse,
   type OrderResponse,
   type QuoteResponse,
   type RedemptionResponse,
   type SettlementResponse,
+  type WatchResponse,
 } from "@/lib/client/api";
+import type { CheckoutAsset } from "@/lib/checkout-limits";
 import { cn } from "@/lib/cn";
 import { errorCopy } from "@/lib/errors";
 import { formatUsd } from "@/lib/money";
 
 /**
- * The buy and gift flows share this machine; only the copy, the extra gift
- * fields and the final screen differ.
- *
- * Two rules run through it. The client never computes an amount — it asks the
- * server for a quote and signs exactly what comes back. And it never declares
- * success: `POST /api/payments/confirm` is the authority, and after that the
- * order's own status decides what the user sees.
+ * Buy and gift share this machine. After a card is chosen, checkout is a
+ * Bitrefill-style cart then a send-to-treasury screen — no in-page wallet
+ * connection. The client never computes an amount; it asks the server for a
+ * quote and watches until the treasury sees that unique payment.
  */
 
-type Step = "select" | "pay" | "settling" | "done";
-
-const ASSET_ORDER = ["BUCKS", "SBUXx", "SOL", "USDC"] as const;
+type Step = "select" | "cart" | "pay" | "settling" | "done";
 
 export function CheckoutFlow({
   menu,
@@ -57,155 +52,120 @@ export function CheckoutFlow({
   mode: "purchase" | "gift";
   initialCardId?: string;
 }) {
-  const { address, canSign, signTransaction } = useWallet();
-  const [paySheetOpen, setPaySheetOpen] = useState(false);
-
   const categories = useMemo(() => groupOffersByCategory(menu.offers), [menu.offers]);
-  const initialOffer = useMemo(
-    () => (initialCardId ? (menu.offers.find((entry) => entry.cardId === initialCardId) ?? null) : null),
-    [menu.offers, initialCardId],
-  );
+  const initialOffer = useMemo(() => {
+    const found = initialCardId
+      ? (menu.offers.find((entry) => entry.cardId === initialCardId) ?? null)
+      : null;
+    if (found && found.stock <= 0) return null;
+    return found;
+  }, [menu.offers, initialCardId]);
   const defaultCategoryId =
-    initialOffer?.categoryId ??
-    (categories.length === 1 ? categories[0]?.categoryId : null);
+    initialOffer?.categoryId ?? (categories.length === 1 ? categories[0]?.categoryId : null);
 
   const [step, setStep] = useState<Step>("select");
   const [categoryId, setCategoryId] = useState<string | null>(defaultCategoryId ?? null);
   const [offer, setOffer] = useState<MenuOffer | null>(initialOffer);
-  const [assetSymbol, setAssetSymbol] = useState<string | null>(null);
+  const [asset, setAsset] = useState<CheckoutAsset>("USDC");
+  const [email, setEmail] = useState("");
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [loadedBalances, setLoadedBalances] = useState<{
-    address: string;
-    balances: BalancesResponse["balances"];
-  } | null>(null);
   const [settlement, setSettlement] = useState<SettlementResponse | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
 
   const [senderName, setSenderName] = useState("");
   const [message, setMessage] = useState("");
 
-  const [busy, setBusy] = useState<null | "quoting" | "signing" | "settling">(null);
+  const [busy, setBusy] = useState<null | "quoting" | "watching">(null);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const notice = catalogNotice(menu);
   const selectedCategory = categories.find((entry) => entry.categoryId === categoryId) ?? null;
+
+  useEffect(() => {
+    if (categoryId || categories.length !== 1) return;
+    setCategoryId(categories[0]!.categoryId);
+  }, [categories, categoryId]);
+
+  useEffect(() => {
+    if (offer || !selectedCategory) return;
+    const inStock = selectedCategory.offers.filter((entry) => entry.stock > 0);
+    if (inStock.length === 1) setOffer(inStock[0]!);
+  }, [offer, selectedCategory]);
   const denominations = useMemo(
     () => distinctDenominations(selectedCategory?.offers ?? []),
     [selectedCategory],
   );
 
-  // Balances follow the connected wallet. Stored with the address they belong
-  // to, so switching wallets can never show the previous one's numbers.
+  const expired = Boolean(quote && new Date(quote.expiresAt).getTime() <= now);
+
   useEffect(() => {
-    if (!address) return;
+    if (step !== "pay" || !quote) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [step, quote]);
 
-    let cancelled = false;
-    void get<BalancesResponse>(`/api/balances?address=${address}`)
-      .then((data) => {
-        if (!cancelled) setLoadedBalances({ address, balances: data.balances });
-      })
-      .catch(() => undefined);
+  const requestQuote = useCallback(async () => {
+    if (!offer) return;
 
-    return () => {
-      cancelled = true;
-    };
-  }, [address]);
-
-  const balances =
-    loadedBalances && loadedBalances.address === address ? loadedBalances.balances : null;
-
-  const assetOptions: AssetOption[] = useMemo(() => {
-    const configured = new Set(balances?.map((entry) => entry.symbol) ?? ASSET_ORDER);
-
-    return ASSET_ORDER.filter((symbol) => configured.has(symbol)).map((symbol) => {
-      const balance = balances?.find((entry) => entry.symbol === symbol);
-      return {
-        symbol,
-        label: balance?.label ?? (symbol === "BUCKS" ? "$BUCKS" : symbol),
-        decimals: balance?.decimals ?? (symbol === "SOL" ? 9 : 6),
-        balance: balance?.amount ?? null,
-      };
-    });
-  }, [balances]);
-
-  const requestQuote = useCallback(
-    async (target: MenuOffer, symbol: string, payer = address) => {
-      if (!payer) return;
-
-      setBusy("quoting");
-      setError(null);
-      setQuote(null);
-
-      try {
-        const response = await post<QuoteResponse>("/api/quote", {
-          categoryId: target.categoryId,
-          cardId: target.cardId,
-          asset: symbol,
-          intent: mode,
-          walletAddress: payer,
-          senderName: mode === "gift" ? senderName || null : null,
-          message: mode === "gift" ? message || null : null,
-        });
-        setQuote(response);
-      } catch (cause) {
-        setError(toError(cause));
-      } finally {
-        setBusy(null);
-      }
-    },
-    [mode, senderName, message, address],
-  );
-
-  const selectAsset = (symbol: string) => {
-    setAssetSymbol(symbol);
-    setQuote(null);
-    if (canSign && address && offer) void requestQuote(offer, symbol, address);
-    else setPaySheetOpen(true);
-  };
-
-  const confirm = async () => {
-    if (!quote) return;
-
+    setBusy("quoting");
     setError(null);
-    setBusy("signing");
-
-    let signed: string;
-    try {
-      signed = await signTransaction(quote.transaction);
-    } catch (cause) {
-      setBusy(null);
-      // Wallet rejection is a normal outcome, not a failure state.
-      const messageText = cause instanceof Error ? cause.message : "";
-      setError(
-        /cancel|reject|denied|declin/i.test(messageText)
-          ? { code: "wallet_rejected", message: errorCopy("wallet_rejected") }
-          : toError(cause),
-      );
-      return;
-    }
-
-    setBusy("settling");
-    setStep("settling");
 
     try {
-      const result = await post<SettlementResponse>("/api/payments/confirm", {
-        quoteId: quote.quoteId,
-        signedTransaction: signed,
+      const response = await post<QuoteResponse>("/api/quote", {
+        categoryId: offer.categoryId,
+        cardId: offer.cardId,
+        asset,
+        intent: mode,
+        email: email.trim() || null,
+        senderName: mode === "gift" ? senderName || null : null,
+        message: mode === "gift" ? message || null : null,
       });
-
-      setSettlement(result);
-      setOrderStatus(result.status);
-      setStep("done");
+      setQuote(response);
+      setNow(Date.now());
+      setStep("pay");
     } catch (cause) {
       setError(toError(cause));
-      setStep("pay");
     } finally {
       setBusy(null);
     }
-  };
+  }, [offer, asset, mode, email, senderName, message]);
 
-  // A card that is still being prepared resolves itself: the order route
-  // advances provider state each time it is read.
+  const watchInFlight = useRef(false);
+
+  useEffect(() => {
+    if (step !== "pay" || !quote || expired) return;
+
+    let cancelled = false;
+
+    const poll = async () => {
+      if (watchInFlight.current) return;
+      watchInFlight.current = true;
+      try {
+        const result = await post<WatchResponse>("/api/payments/watch", { quoteId: quote.quoteId });
+        if (cancelled) return;
+        if (result.watching) return;
+
+        setSettlement(result);
+        setOrderStatus(result.status);
+        setStep("done");
+      } catch (cause) {
+        if (cancelled) return;
+        const next = toError(cause);
+        if (next.code === "quote_expired") setError(next);
+      } finally {
+        watchInFlight.current = false;
+      }
+    };
+
+    void poll();
+    const timer = setInterval(() => void poll(), 3_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [step, quote, expired]);
+
   useEffect(() => {
     if (!settlement) return;
     if (orderStatus === "ready" || orderStatus === "claimed") return;
@@ -239,12 +199,18 @@ export function CheckoutFlow({
     return post<RedemptionResponse>(`/api/orders/${settlement.orderId}/reveal`);
   }, [settlement]);
 
+  const backToSelect = () => {
+    setStep("select");
+    setQuote(null);
+    setError(null);
+  };
+
   if (!menu.available) {
     return <Unavailable reason={menu.reason} />;
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className={cn("mx-auto", step === "pay" ? "max-w-4xl" : "max-w-2xl")}>
       {notice ? (
         <p className="mb-6 rounded-sm border border-caramel/30 bg-caramel/10 px-4 py-3 text-center text-sm text-ink-soft">
           {notice}
@@ -288,7 +254,12 @@ export function CheckoutFlow({
                       <CardArt
                         alt={`${category.categoryName} gift card`}
                         faceValueUsd={category.offers[0]?.faceValueUsd}
-                        seed={category.categoryId}
+                        seed={doodleSeedForOffer(category.offers[0] ?? {
+                          categoryId: category.categoryId,
+                          cardId: category.categoryId,
+                          name: category.categoryName,
+                          categoryName: category.categoryName,
+                        })}
                         showValue={false}
                       />
                       <span className="mt-2 block px-1 text-[0.9375rem] font-bold tracking-[-0.02em] text-ink">
@@ -319,27 +290,35 @@ export function CheckoutFlow({
                       const value = entry.faceValueUsd
                         ? formatUsd(BigInt(entry.faceValueUsd))
                         : entry.name;
+                      const soldOut = entry.stock <= 0;
                       return (
                         <button
                           key={`${entry.categoryId}:${entry.cardId}`}
                           type="button"
-                          onClick={() => setOffer(entry)}
+                          onClick={() => {
+                            if (!soldOut) setOffer(entry);
+                          }}
+                          disabled={soldOut}
                           aria-pressed={active}
                           className={cn(
                             "overflow-visible rounded-[1.2rem] p-1 text-left transition-transform duration-300 hover:-translate-y-0.5",
                             active && "ring-2 ring-ink ring-offset-2 ring-offset-foam",
+                            soldOut && "cursor-not-allowed opacity-55 hover:translate-y-0",
                           )}
                         >
                           <CardArt
                             alt={`${entry.categoryName} ${value} gift card`}
                             faceValueUsd={entry.faceValueUsd}
-                            seed={entry.cardId}
+                            seed={doodleSeedForOffer(entry)}
                           />
                           <span className="mt-2 block px-1 text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">
                             {value}
                           </span>
                           <span className="mt-0.5 block px-1 text-[0.9375rem] font-semibold text-ink">
                             {formatUsd(BigInt(entry.providerPriceUsd))}
+                          </span>
+                          <span className="mt-0.5 block px-1 text-[0.75rem] font-semibold text-ink-soft">
+                            {stockLabel(entry.stock)}
                           </span>
                         </button>
                       );
@@ -362,131 +341,56 @@ export function CheckoutFlow({
               <Button
                 className="mt-8 w-full"
                 size="lg"
-                disabled={!offer}
-                onClick={() => setStep("pay")}
+                disabled={!offer || offer.stock <= 0}
+                onClick={() => {
+                  setError(null);
+                  setStep("cart");
+                }}
               >
-                {offer ? "Continue" : selectedCategory ? "Pick a value" : "Pick a card"}
+                {offer && offer.stock <= 0
+                  ? "Out of stock"
+                  : offer
+                    ? "Continue"
+                    : selectedCategory
+                      ? "Pick a value"
+                      : "Pick a card"}
               </Button>
             </GlassCard>
           </Panel>
         ) : null}
 
-        {step === "pay" && offer ? (
+        {step === "cart" && offer ? (
+          <Panel key="cart">
+            <CartPanel
+              offer={offer}
+              purchasable={menu.purchasable}
+              email={email}
+              onEmail={setEmail}
+              asset={asset}
+              onAsset={setAsset}
+              onClose={backToSelect}
+              onRemove={() => {
+                setOffer(null);
+                backToSelect();
+              }}
+              onContinue={() => void requestQuote()}
+              busy={busy === "quoting"}
+              error={error}
+            />
+          </Panel>
+        ) : null}
+
+        {step === "pay" && offer && quote ? (
           <Panel key="pay">
-            <GlassCard className="p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="label-mono">Step 2</p>
-                  <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
-                    Pay
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep("select");
-                    setQuote(null);
-                    setAssetSymbol(null);
-                  }}
-                  className="text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
-                >
-                  Change card
-                </button>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-[minmax(0,11rem)_1fr] sm:items-center">
-                <CardArt
-                  alt={`${offer.categoryName} gift card`}
-                  faceValueUsd={offer.faceValueUsd}
-                  seed={offer.cardId}
-                />
-                <div className="glass-soft rounded-[1.2rem] px-4 py-3.5">
-                  <p className="text-[1.05rem] font-bold text-ink">{offer.categoryName} gift card</p>
-                  <p className="mt-1 text-sm font-semibold text-ink">{offer.name}</p>
-                  <p className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-ink">
-                    {offer.faceValueUsd ? formatUsd(BigInt(offer.faceValueUsd)) : "—"}
-                  </p>
-                </div>
-              </div>
-
-              {!menu.purchasable ? (
-                <div className="glass-soft mt-7 rounded-sm p-5 text-center">
-                  <p className="text-[0.9375rem] font-semibold text-ink">Checkout isn’t open yet.</p>
-                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">
-                    These are the Starbucks values we’ll sell. Payment opens once we can actually
-                    send cards.
-                  </p>
-                  <div className="mt-4 flex justify-center">
-                    <ButtonLink href="/" variant="secondary" size="md">
-                      Back home
-                    </ButtonLink>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="mt-7">
-                    <p className="label-mono">Pay with</p>
-                    <div className="mt-3">
-                      <AssetPicker
-                        assets={assetOptions}
-                        selected={assetSymbol}
-                        onSelect={selectAsset}
-                        disabled={busy !== null}
-                      />
-                    </div>
-                  </div>
-
-                  {busy === "quoting" ? (
-                    <p className="mt-6 text-sm text-ink-soft">Getting your price…</p>
-                  ) : null}
-
-                  {quote ? (
-                    <div className="mt-7">
-                      <PaymentSummary quote={quote} />
-
-                      <Button
-                        className="mt-7 w-full"
-                        size="lg"
-                        onClick={() => {
-                          if (!canSign) {
-                            setPaySheetOpen(true);
-                            return;
-                          }
-                          void confirm();
-                        }}
-                        disabled={busy !== null}
-                      >
-                        {busy === "signing"
-                          ? "Approve in your wallet"
-                          : mode === "gift"
-                            ? "Pay and send"
-                            : "Pay"}
-                      </Button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          assetSymbol && offer && address && void requestQuote(offer, assetSymbol, address)
-                        }
-                        disabled={busy !== null || !address}
-                        className="mt-3 w-full text-center text-[0.8125rem] font-semibold text-ink-soft transition-colors hover:text-ink"
-                      >
-                        Refresh price
-                      </button>
-                    </div>
-                  ) : null}
-                </>
-              )}
-
-              {error ? <ErrorNote error={error} /> : null}
-            </GlassCard>
-            <WalletSheet
-              open={paySheetOpen}
-              onClose={() => setPaySheetOpen(false)}
-              title="Pay with your wallet"
-              body="Pick the wallet that will pay. You’ll approve the payment there — no separate login."
-              onConnected={(payer) => {
-                if (offer && assetSymbol) void requestQuote(offer, assetSymbol, payer);
+            <PayPanel
+              offer={offer}
+              quote={quote}
+              expired={expired}
+              error={error}
+              onBackToCart={() => {
+                setQuote(null);
+                setError(null);
+                setStep("cart");
               }}
             />
           </Panel>
@@ -537,12 +441,8 @@ function Panel({ children }: { children: React.ReactNode }) {
 }
 
 function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
-  const labels =
-    mode === "gift"
-      ? ["Amount", "Pay", "Share"]
-      : ["Amount", "Pay", "Card"];
-
-  const index = step === "select" ? 0 : step === "pay" ? 1 : 2;
+  const labels = mode === "gift" ? ["Cart", "Pay", "Share"] : ["Cart", "Pay", "Card"];
+  const index = step === "select" || step === "cart" ? 0 : step === "pay" || step === "settling" ? 1 : 2;
 
   return (
     <ol className="mb-6 flex items-center justify-center gap-2" aria-label="progress">
@@ -570,10 +470,6 @@ function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
   );
 }
 
-/**
- * Final screen. Branches on the order's real status, including the case where
- * the payment landed but the provider could not deliver.
- */
 function Result({
   mode,
   settlement,
@@ -738,28 +634,6 @@ function Unavailable({ reason }: { reason: string | null }) {
   );
 }
 
-function ErrorNote({ error }: { error: { code: string; message: string } }) {
-  const retryable = ["quote_expired", "out_of_stock", "offer_unavailable", "no_route"].includes(
-    error.code,
-  );
-
-  return (
-    <div className="mt-6 rounded-sm border border-crema-300/25 bg-crema-300/8 px-4 py-3.5" role="alert">
-      <p className="text-sm text-roast-500">{error.message}</p>
-      {retryable ? (
-        <p className="mt-1 text-xs text-ink-soft">
-          Nothing was charged. Try again — or{" "}
-          <Link href="/coffee" className="underline underline-offset-2">
-            reload the menu
-          </Link>
-          .
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-/** Steam rising from a cup: the one place a loader earns some personality. */
 function Brewing() {
   return (
     <div aria-hidden className="flex flex-col items-center">
@@ -779,7 +653,7 @@ function Brewing() {
       <span
         className="mt-2 h-10 w-14 rounded-b-[1.25rem] rounded-t-md"
         style={{
-          background: "linear-gradient(170deg, #f6efe4 0%, #e2cdb2 50%, #a9866a 100%)",
+          background: "linear-gradient(170deg, #f6efe4 0%, #e2cdb2 50%, #a97b57 100%)",
           boxShadow: "inset 0 -6px 14px rgba(74,51,37,0.35)",
         }}
       />

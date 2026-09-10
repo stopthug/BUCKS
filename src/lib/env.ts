@@ -40,7 +40,7 @@ const schema = z.object({
   JUPITER_API_BASE_URL: z.string().trim().url().default("https://api.jup.ag/swap/v2"),
 
   USDC_MINT: base58Mint.default("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
-  SBUXX_MINT: optionalBase58Mint,
+  SBUXX_MINT: optionalBase58Mint.default("Xs9gd8SGbYQn9kkUYQayn46BdqQbvvUshEF6ZpRAzM7"),
   BUCKS_MINT: optionalBase58Mint,
 
   /** Wallet that receives USDC for every purchase. */
@@ -92,6 +92,9 @@ function load(): ServerEnv {
 }
 
 export function env(): ServerEnv {
+  if (process.env.NODE_ENV !== "production") {
+    return load();
+  }
   cached ??= load();
   return cached;
 }

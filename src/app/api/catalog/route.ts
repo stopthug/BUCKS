@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 /**
  * The Starbucks catalog the storefront is showing right now.
  *
- * This is the same view as the homepage: live provider inventory when we can
- * fulfil it, otherwise the preview cards so the site is never a blank error.
+ * This is the same view as the homepage: live provider inventory when a
+ * FazerCards key is configured, otherwise the non-purchasable preview.
  */
 export async function GET(request: Request) {
   return handle("catalog", async () => {

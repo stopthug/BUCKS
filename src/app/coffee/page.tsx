@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Get a gift card",
-  description: "Buy a Starbucks gift card with $BUCKS, SBUXx, SOL, or USDC.",
+  description: "Buy a Starbucks gift card with USDC, SOL, or SBUXx.",
 };
 
 export default async function CoffeePage({ searchParams }: PageProps<"/coffee">) {

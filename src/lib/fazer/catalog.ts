@@ -24,8 +24,12 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 const CATEGORY_PAGE_SIZE = 200;
 const MAX_CATEGORY_PAGES = 40;
 
-/** Matches "Starbucks", "Starbucks US", "STARBUCKS (Global)", "SBUX". */
+/** Matches "Starbucks", "Starbucks US", "STARBUCKS (Global)", "SBUX", `starbucks_us`. */
 const STARBUCKS_PATTERN = /\bstarbucks\b|\bsbux\b/i;
+
+function isStarbucksCategory(category: { name: string; category_id?: string }): boolean {
+  return STARBUCKS_PATTERN.test(category.name) || STARBUCKS_PATTERN.test(category.category_id ?? "");
+}
 
 export interface CoffeeOffer {
   categoryId: string;
@@ -133,10 +137,14 @@ async function fetchAllCategories(): Promise<FazerGiftCardCategory[]> {
   return items;
 }
 
+function catalogSourceKey(name: string): string {
+  return `${name}:${env().FAZER_DEV_MOCK ? "mock" : "live"}`;
+}
+
 export async function listStarbucksCategories(): Promise<FazerGiftCardCategory[]> {
-  return cached("starbucks-categories", CACHE_TTL_MS, async () => {
+  return cached(catalogSourceKey("starbucks-categories"), CACHE_TTL_MS, async () => {
     const categories = await fetchAllCategories();
-    return categories.filter((category) => STARBUCKS_PATTERN.test(category.name));
+    return categories.filter(isStarbucksCategory);
   });
 }
 
@@ -162,7 +170,6 @@ function toCoffeeOffer(
   offer: FazerGiftCardOffer,
 ): CoffeeOffer | null {
   if (!offer.card_id) return null;
-  if (offer.stock <= 0) return null;
 
   return {
     categoryId,
@@ -180,10 +187,11 @@ function toCoffeeOffer(
 
 /**
  * The live Starbucks catalog for this reseller account. Offers with no
- * `card_id` or no stock are dropped: we only ever show what can be bought.
+ * `card_id` are dropped. Zero-stock rows stay visible so the storefront can
+ * say sold out instead of inventing a preview menu.
  */
 export async function getCoffeeCatalog(): Promise<CoffeeCatalog> {
-  return cached("coffee-catalog", CACHE_TTL_MS, async () => {
+  return cached(catalogSourceKey("coffee-catalog"), CACHE_TTL_MS, async () => {
     const categories = await listStarbucksCategories();
 
     if (categories.length === 0) {
@@ -199,16 +207,16 @@ export async function getCoffeeCatalog(): Promise<CoffeeCatalog> {
       const fetched = await fetchOffers(category.category_id);
       const imageUrl = fetched.imageUrl ?? resolveProviderImageUrl(category.imageurl);
       const categoryName = fetched.categoryName || category.name;
-      let inStock = 0;
+      let mappedCount = 0;
 
       for (const offer of fetched.offers) {
         const mapped = toCoffeeOffer(category.category_id, categoryName, imageUrl, offer);
         if (!mapped) continue;
         offers.push(mapped);
-        inStock += 1;
+        mappedCount += 1;
       }
 
-      if (inStock > 0) {
+      if (mappedCount > 0) {
         catalogCategories.push({ id: category.category_id, name: categoryName, imageUrl });
       }
     }
@@ -245,7 +253,7 @@ export async function getLiveOffer(
 
   const { categoryName, imageUrl, offers } = await fetchOffers(categoryId);
 
-  if (!STARBUCKS_PATTERN.test(categoryName)) {
+  if (!isStarbucksCategory({ name: categoryName, category_id: categoryId })) {
     throw new AppError("offer_unavailable", { detail: `category ${categoryId} is not Starbucks` });
   }
 
@@ -257,6 +265,9 @@ export async function getLiveOffer(
 
   const mapped = toCoffeeOffer(categoryId, categoryName, imageUrl, offer);
   if (!mapped) {
+    throw new AppError("offer_unavailable", { detail: `card ${cardId} is missing a provider id` });
+  }
+  if (mapped.stock <= 0) {
     throw new AppError("out_of_stock", { detail: `card ${cardId} has no stock` });
   }
 

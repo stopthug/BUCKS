@@ -19,6 +19,7 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export interface Session {
   userId: string;
+  /** Empty for guest checkout sessions that are not tied to a wallet. */
   address: string;
   issuedAt: number;
 }
@@ -86,21 +87,64 @@ export async function getSession(): Promise<Session | null> {
 }
 
 /**
- * Session plus a database check that the wallet still belongs to the user.
- * Every owner-scoped route goes through this rather than trusting the cookie.
+ * Session plus a database check. Wallet sessions must still match a linked
+ * wallet; guest checkout sessions only need the user row to exist so they can
+ * reveal a card without connecting.
  */
 export async function requireSession(): Promise<Session> {
   const session = await getSession();
   if (!session) throw new AppError("unauthorized");
 
-  const row = await queryOne<{ user_id: string }>(
-    `SELECT user_id FROM wallets WHERE user_id = $1 AND address = $2`,
-    [session.userId, session.address],
-  );
+  if (session.address) {
+    const row = await queryOne<{ user_id: string }>(
+      `SELECT user_id FROM wallets WHERE user_id = $1 AND address = $2`,
+      [session.userId, session.address],
+    );
 
-  if (!row) throw new AppError("unauthorized", { detail: "session wallet no longer linked" });
+    if (!row) throw new AppError("unauthorized", { detail: "session wallet no longer linked" });
+    return session;
+  }
 
+  const user = await queryOne<{ id: string }>(`SELECT id FROM users WHERE id = $1`, [session.userId]);
+  if (!user) throw new AppError("unauthorized", { detail: "guest session user missing" });
   return session;
+}
+
+/**
+ * Keeps the checkout user in the session cookie so reveal works without a
+ * wallet. Does not overwrite a session that already belongs to this user.
+ */
+export async function ensureCheckoutSession(userId: string): Promise<void> {
+  const existing = await getSession();
+  if (existing?.userId === userId) return;
+
+  await createSession({
+    userId,
+    address: "",
+    issuedAt: Date.now(),
+  });
+}
+
+/** Creates a user with no wallet. Used for send-to-treasury checkout. */
+export async function createGuestUser(email?: string | null): Promise<string> {
+  const user = await queryOne<{ id: string }>(
+    `INSERT INTO users (email) VALUES ($1) RETURNING id`,
+    [email ?? null],
+  );
+  if (!user) throw new AppError("internal", { detail: "failed to create guest user" });
+  return user.id;
+}
+
+export async function touchUser(userId: string, email?: string | null): Promise<void> {
+  if (email) {
+    await queryOne(
+      `UPDATE users SET last_seen_at = now(), email = COALESCE(email, $2) WHERE id = $1 RETURNING id`,
+      [userId, email],
+    );
+    return;
+  }
+
+  await queryOne(`UPDATE users SET last_seen_at = now() WHERE id = $1 RETURNING id`, [userId]);
 }
 
 /**

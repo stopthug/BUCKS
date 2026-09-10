@@ -13,7 +13,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/glass";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
 import { errorCopy } from "@/lib/errors";
-import { catalogNotice, distinctDenominations, type CoffeeMenu } from "@/lib/menu";
+import { catalogNotice, doodleSeedForOffer, stockLabel, type CoffeeMenu } from "@/lib/menu";
 import { formatUsd } from "@/lib/money";
 
 const WAYS = [
@@ -48,7 +48,7 @@ const WAYS = [
 ] as const;
 
 export function Hero({ menu }: { menu: CoffeeMenu }) {
-  const cards = distinctDenominations(menu.offers).slice(0, 4);
+  const cards = menu.offers.slice(0, 12);
   const notice = catalogNotice(menu);
 
   return (
@@ -130,7 +130,13 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             </p>
           </div>
           {menu.available ? (
-            <RevealGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <RevealGroup
+              className={
+                cards.length === 1
+                  ? "mx-auto grid max-w-sm gap-6"
+                  : "grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+              }
+            >
               {cards.map((offer, index) => {
                 const value = offer.faceValueUsd
                   ? formatUsd(BigInt(offer.faceValueUsd))
@@ -146,7 +152,7 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                         <CardArt
                           alt={`${offer.categoryName} ${value} gift card`}
                           faceValueUsd={offer.faceValueUsd}
-                          seed={offer.cardId}
+                          seed={doodleSeedForOffer(offer)}
                           className="rounded-none bg-transparent shadow-none"
                           priority={index < 4}
                         />
@@ -155,17 +161,14 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                         <p className="text-xl font-extrabold tracking-[-0.03em] text-ink">
                           {value} Starbucks card
                         </p>
+                        <p className="mt-0.5 text-sm font-semibold text-ink-soft">{offer.categoryName}</p>
                         <div className="mt-1.5 flex items-center justify-between gap-3">
                           <p className="text-[0.9375rem] font-semibold text-ink">
                             {formatUsd(BigInt(offer.providerPriceUsd))}
                           </p>
                           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-600">
                             <StatusDot />
-                            {menu.purchasable
-                              ? offer.stock > 20
-                                ? "In stock"
-                                : `${offer.stock} left`
-                              : "Preview"}
+                            {menu.sandbox && !menu.purchasable ? "Preview" : stockLabel(offer.stock)}
                           </span>
                         </div>
                       </div>

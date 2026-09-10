@@ -20,6 +20,7 @@ export const RATE_LIMITS = {
   authVerify: { limit: 10, windowSeconds: 60 },
   quote: { limit: 20, windowSeconds: 60 },
   confirm: { limit: 15, windowSeconds: 60 },
+  watch: { limit: 40, windowSeconds: 60 },
   catalog: { limit: 60, windowSeconds: 60 },
   claim: { limit: 12, windowSeconds: 60 },
   claimView: { limit: 60, windowSeconds: 60 },

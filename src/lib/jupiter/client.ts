@@ -92,6 +92,33 @@ export interface OrderParams {
   slippageBps?: number;
 }
 
+const PRICE_TIMEOUT_MS = 8_000;
+const priceItemSchema = z.object({
+  usdPrice: z.number().optional(),
+  price: z.number().optional(),
+  stockData: z.object({ price: z.number().optional() }).optional(),
+});
+
+/**
+ * Spot USD price for wallet-free quotes when a swap route does not exist.
+ * xStocks often price as equities here even when `/order` has no pool.
+ */
+export async function getJupiterUsdPrice(mint: string): Promise<number> {
+  const url = `https://lite-api.jup.ag/price/v3?ids=${encodeURIComponent(mint)}`;
+  const response = await fetchJson(url, { headers: { Accept: "application/json" } }, PRICE_TIMEOUT_MS);
+  const record = response.body && typeof response.body === "object" ? (response.body as Record<string, unknown>) : null;
+  const parsed = record ? priceItemSchema.safeParse(record[mint]) : null;
+  const price = parsed?.success
+    ? (parsed.data.usdPrice ?? parsed.data.price ?? parsed.data.stockData?.price)
+    : undefined;
+
+  if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
+    throw new AppError("liquidity_unavailable", { detail: `no Jupiter spot price for ${mint}` });
+  }
+
+  return price;
+}
+
 export async function getJupiterOrder(params: OrderParams): Promise<JupiterOrder> {
   const url = new URL(`${env().JUPITER_API_BASE_URL.replace(/\/$/, "")}/order`);
   url.searchParams.set("inputMint", params.inputMint);

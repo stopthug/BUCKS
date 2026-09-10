@@ -31,8 +31,12 @@ export default async function AccountPage() {
           <h1 className="font-display mt-4 text-[clamp(2.25rem,7vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             Your coffee.
           </h1>
-          {session ? (
+          {session?.address ? (
             <p className="mt-4 font-mono text-xs text-ink-soft">{session.address}</p>
+          ) : session ? (
+            <p className="mt-4 text-sm text-ink-soft">
+              Guest checkout — this browser can open the cards you just bought.
+            </p>
           ) : null}
         </header>
       </Reveal>

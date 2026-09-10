@@ -5,8 +5,11 @@ import { decryptString, encryptJson, encryptString, hashToken } from "@/lib/cryp
 import {
   attachRedemptionData,
   consumeQuote,
+  getGiftForOrder,
   getOrder,
+  getOrderByQuoteId,
   getProduct,
+  getQuote,
   insertGift,
   insertOrder,
   insertPayment,
@@ -26,7 +29,7 @@ import type { ProviderOrder, RedemptionCard } from "@/lib/fazer/types";
 import { executeJupiterOrder } from "@/lib/jupiter/client";
 import { getUsdcAsset } from "@/lib/solana/assets";
 import { submitSignedTransaction } from "@/lib/solana/transfer";
-import { verifyPayment } from "@/lib/solana/verify";
+import { verifyIncomingTransfer, verifyPayment } from "@/lib/solana/verify";
 
 /**
  * Settlement pipeline.
@@ -65,7 +68,10 @@ export async function settlePayment(input: SettlementInput): Promise<SettlementR
   // 1 — claim the quote. Throws if expired or already used.
   const quote = await consumeQuote(input.quoteId);
 
-  if (quote.userId !== input.userId || quote.walletAddress !== input.walletAddress) {
+  if (quote.userId !== input.userId) {
+    throw new AppError("forbidden", { detail: "quote belongs to another user" });
+  }
+  if (quote.walletAddress && quote.walletAddress !== input.walletAddress) {
     throw new AppError("forbidden", { detail: "quote belongs to another wallet" });
   }
 
@@ -100,7 +106,7 @@ export async function settlePayment(input: SettlementInput): Promise<SettlementR
   try {
     verification = await verifyPayment({
       signature,
-      expectedPayer: quote.walletAddress,
+      expectedPayer: quote.walletAddress ?? input.walletAddress,
       expectedInputMint: quote.paymentMint,
       treasuryOwner: env().TREASURY_WALLET,
       usdcMint: usdc.mint,
@@ -145,6 +151,130 @@ export async function settlePayment(input: SettlementInput): Promise<SettlementR
   if (quote.intent === "gift") {
     const claimUrl = await ensureGift(fulfilled, quote);
     if (claimUrl) result.claimUrl = claimUrl;
+  }
+
+  return result;
+}
+
+export interface WatchSettlementInput {
+  quoteId: string;
+  signature: string;
+}
+
+/**
+ * Settles a send-to-treasury payment. No in-app signature and no swap: the
+ * company float covers FazerCards. Safe to call twice for the same quote —
+ * a consumed quote returns the existing order so polling recovers after refresh.
+ */
+export async function settleFromWatch(input: WatchSettlementInput): Promise<SettlementResult> {
+  const existing = await getOrderByQuoteId(input.quoteId);
+  if (existing) return settlementFromOrder(existing);
+
+  const quote = await getQuote(input.quoteId);
+  if (quote.consumedAt) {
+    const order = await waitForOrder(input.quoteId);
+    if (order) return settlementFromOrder(order);
+    throw new AppError("quote_used");
+  }
+
+  const verification = await verifyIncomingTransfer({
+    signature: input.signature,
+    treasuryOwner: env().TREASURY_WALLET,
+    expectedMint: quote.paymentMint,
+    expectedAmount: quote.paymentAmount,
+    native: quote.paymentAsset === "SOL",
+    expectedMemo: quote.paymentMemo,
+  });
+
+  let claimed: QuoteRow;
+  try {
+    claimed = await consumeQuote(input.quoteId);
+  } catch (error) {
+    if (error instanceof AppError && error.code === "quote_used") {
+      const order = await waitForOrder(input.quoteId);
+      if (order) return settlementFromOrder(order);
+    }
+    throw error;
+  }
+
+  const product = await getProduct(claimed.productId);
+  if (!product) throw new AppError("internal", { detail: "quote references a missing product" });
+
+  let paymentId: string;
+  try {
+    paymentId = await insertPayment({
+      quoteId: claimed.id,
+      userId: claimed.userId,
+      walletAddress: verification.payer,
+      asset: claimed.paymentAsset,
+      mint: claimed.paymentMint,
+      amount: claimed.paymentAmount,
+      signature: input.signature,
+    });
+  } catch (error) {
+    if (error instanceof AppError && error.code === "signature_reused") {
+      const order = await waitForOrder(input.quoteId);
+      if (order) return settlementFromOrder(order);
+    }
+    throw error;
+  }
+
+  await markPaymentConfirmed({
+    paymentId,
+    receivedUsdc: claimed.paymentAsset === "USDC" ? verification.receivedAmount : claimed.requiredUsdc,
+    slot: verification.slot,
+  });
+
+  const order = await insertOrder({
+    userId: claimed.userId,
+    productId: product.id,
+    quoteId: claimed.id,
+    paymentId,
+    intent: claimed.intent,
+    paymentAsset: claimed.paymentAsset,
+    paymentAmount: claimed.paymentAmount,
+    paymentSignature: input.signature,
+    providerPriceUsd: claimed.providerPriceUsd,
+    faceValueUsd: product.faceValueUsd,
+    idempotencyKey: createIdempotencyKey(),
+    status: "payment_confirmed",
+  });
+
+  const fulfilled = await fulfillOrder(order.id);
+
+  const result: SettlementResult = {
+    orderId: order.id,
+    status: fulfilled.status,
+    signature: input.signature,
+  };
+
+  if (claimed.intent === "gift") {
+    const claimUrl = await ensureGift(fulfilled, claimed);
+    if (claimUrl) result.claimUrl = claimUrl;
+  }
+
+  return result;
+}
+
+async function waitForOrder(quoteId: string): Promise<OrderRow | null> {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const order = await getOrderByQuoteId(quoteId);
+    if (order) return order;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return null;
+}
+
+async function settlementFromOrder(order: OrderRow): Promise<SettlementResult> {
+  const result: SettlementResult = {
+    orderId: order.id,
+    status: order.status,
+    signature: order.paymentSignature ?? "",
+  };
+
+  if (order.intent === "gift") {
+    const gift = await getGiftForOrder(order.id);
+    if (gift) result.claimUrl = claimUrlFromGift(gift.encryptedClaimToken);
   }
 
   return result;

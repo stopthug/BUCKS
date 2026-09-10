@@ -71,6 +71,19 @@ export function formatUsd(amount: bigint): string {
  * Formats a token amount for display: enough significant digits to be useful
  * for both cheap memecoins and expensive assets, without scientific notation.
  */
+/**
+ * Exact decimal string with no grouping. Used for Solana Pay URLs and the
+ * amount the buyer copies — truncating here would make the watched amount miss.
+ */
+export function toUiAmount(amount: bigint, decimals: number): string {
+  if (amount < 0n) throw new MoneyError("Negative amounts are not supported");
+  const divisor = 10n ** BigInt(decimals);
+  const whole = amount / divisor;
+  const fraction = amount % divisor;
+  if (fraction === 0n) return whole.toString();
+  return `${whole.toString()}.${fraction.toString().padStart(decimals, "0").replace(/0+$/, "")}`;
+}
+
 export function formatTokenAmount(amount: bigint, decimals: number): string {
   if (amount === 0n) return "0";
   const divisor = 10n ** BigInt(decimals);

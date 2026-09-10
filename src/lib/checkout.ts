@@ -1,41 +1,39 @@
 import "server-only";
 
-import { GIFT_MESSAGE_MAX_LENGTH, GIFT_NAME_MAX_LENGTH } from "@/lib/checkout-limits";
+import { randomUUID } from "node:crypto";
+
+import QRCode from "qrcode";
+
+import { GIFT_MESSAGE_MAX_LENGTH, GIFT_NAME_MAX_LENGTH, RECEIPT_EMAIL_MAX_LENGTH } from "@/lib/checkout-limits";
 import { insertQuote, upsertProduct, type OrderIntent, type QuoteRow } from "@/lib/db/queries";
 import { env } from "@/lib/env";
-import { AppError } from "@/lib/errors";
+import { AppError, isAppError } from "@/lib/errors";
 import { assertFulfillable, getLiveOffer, type CoffeeOffer } from "@/lib/fazer/catalog";
+import { getJupiterUsdPrice } from "@/lib/jupiter/client";
 import { quoteCoffeePayment } from "@/lib/jupiter/pricing";
-import { USD_DECIMALS } from "@/lib/money";
+import { USD_DECIMALS, addBasisPoints, divideCeil, parseDecimalToBaseUnits, toUiAmount } from "@/lib/money";
 import { getAsset, getUsdcAsset, type AssetConfig } from "@/lib/solana/assets";
-import { getAssetBalance } from "@/lib/solana/balances";
-import { buildUsdcTransfer } from "@/lib/solana/transfer";
 
 /**
- * Quote construction.
+ * Quote construction for wallet-free checkout.
  *
- * Two rules shape this file. First, the provider has to be able to fulfil the
- * card *before* a user is asked to sign anything — checking stock and reseller
- * float afterwards would mean taking money we cannot honour. Second, every
- * amount is computed here on the server and stored; the client receives
- * display values and an opaque quote id, and can influence neither.
+ * The provider has to be able to fulfil the card before a user is asked to send
+ * anything. Amounts are computed here, stored, and identified on-chain by an
+ * exact unique `payment_amount` plus memo `bucks:{quoteId}`. The client never
+ * signs a transaction in this app — it shows a Solana Pay QR to the treasury.
  */
 
-/** Short enough that a stale swap route cannot be signed. */
-const QUOTE_TTL_SECONDS = 75;
-/** Lamports kept aside so a wallet is never left unable to pay a signature fee. */
-const LAMPORT_FEE_RESERVE = 15_000n;
+/** Watch window: long enough to send from an external wallet. */
+const QUOTE_TTL_SECONDS = 600;
 
-/** $BUCKS takes nothing. External costs are itemised instead of marked up. */
 export const PLATFORM_FEE_USD = 0n;
 
-export { GIFT_MESSAGE_MAX_LENGTH, GIFT_NAME_MAX_LENGTH };
+export { GIFT_MESSAGE_MAX_LENGTH, GIFT_NAME_MAX_LENGTH, RECEIPT_EMAIL_MAX_LENGTH };
 
 export interface CheckoutQuote {
   quoteId: string;
   expiresAt: string;
-  /** Base64 transaction for the wallet to sign. */
-  transaction: string;
+  createdAt: string;
   asset: {
     symbol: string;
     label: string;
@@ -43,19 +41,23 @@ export interface CheckoutQuote {
   };
   /** Input amount in the payment asset's base units, as a string. */
   payAmount: string;
+  /** Exact UI amount to send / copy. No grouping. */
+  payAmountUi: string;
+  treasuryAddress: string;
+  paymentMemo: string;
+  solanaPayUrl: string;
+  qrDataUrl: string;
+  receiptEmail: string | null;
   card: {
     name: string;
     categoryName: string;
-    /** Base units of USD (6dp), as strings. */
     faceValueUsd: string | null;
     providerPriceUsd: string;
   };
   costs: {
     platformFeeUsd: string;
     networkFeeLamports: string;
-    /** Expected USDC delivered to settlement, base units. */
     expectedUsdc: string;
-    /** Minimum USDC the payment guarantees. */
     guaranteedUsdc: string;
     routeLabel: string | null;
     slippageBps: number | null;
@@ -65,17 +67,16 @@ export interface CheckoutQuote {
 
 export interface CreateQuoteInput {
   userId: string;
-  walletAddress: string;
   categoryId: string;
   cardId: string;
   assetSymbol: string;
   intent: OrderIntent;
   senderName?: string | null;
   message?: string | null;
+  receiptEmail?: string | null;
 }
 
 export async function createCheckoutQuote(input: CreateQuoteInput): Promise<CheckoutQuote> {
-  // 1 — live offer, live stock, live reseller balance.
   const offer = await getLiveOffer(input.categoryId, input.cardId);
   await assertFulfillable(offer, 1);
 
@@ -87,16 +88,21 @@ export async function createCheckoutQuote(input: CreateQuoteInput): Promise<Chec
 
   const senderName = sanitiseName(input.senderName);
   const message = sanitiseMessage(input.message);
+  const receiptEmail = sanitiseEmail(input.receiptEmail);
+
+  const quoteId = randomUUID();
+  const paymentMemo = `bucks:${quoteId}`;
+  const suffix = uniqueAmountSuffix(quoteId);
 
   const settlement =
     asset.symbol === "USDC"
-      ? await quoteDirectUsdc({ asset, input, requiredUsdc })
-      : await quoteViaJupiter({ asset, usdc, input, requiredUsdc });
+      ? quoteDirectUsdc(requiredUsdc, suffix)
+      : await quotePaymentAsset({ asset, usdc, requiredUsdc, suffix });
 
-  // 2 — persist the authoritative numbers.
   const quote = await insertQuote({
+    id: quoteId,
     userId: input.userId,
-    walletAddress: input.walletAddress,
+    walletAddress: null,
     productId: product.id,
     intent: input.intent,
     paymentAsset: asset.symbol,
@@ -107,18 +113,19 @@ export async function createCheckoutQuote(input: CreateQuoteInput): Promise<Chec
     routeLabel: settlement.routeLabel,
     jupiterRequestId: settlement.jupiterRequestId,
     networkFeeLamports: settlement.networkFeeLamports,
-    unsignedTransaction: settlement.transaction,
+    unsignedTransaction: null,
     senderName: input.intent === "gift" ? senderName : null,
     giftMessage: input.intent === "gift" ? message : null,
+    receiptEmail,
+    paymentMemo,
     ttlSeconds: QUOTE_TTL_SECONDS,
   });
 
-  return toCheckoutQuote({ quote, offer, asset, settlement });
+  return toCheckoutQuote({ quote, offer, asset, settlement, paymentMemo, receiptEmail });
 }
 
 interface Settlement {
   payAmount: bigint;
-  transaction: string;
   routeLabel: string | null;
   jupiterRequestId: string | null;
   networkFeeLamports: bigint;
@@ -128,34 +135,12 @@ interface Settlement {
   routerFeeBps: number | null;
 }
 
-/** USDC already is the settlement asset, so it moves as a plain transfer. */
-async function quoteDirectUsdc(args: {
-  asset: AssetConfig;
-  input: CreateQuoteInput;
-  requiredUsdc: bigint;
-}): Promise<Settlement> {
-  const { asset, input, requiredUsdc } = args;
-
-  const balance = await getAssetBalance(input.walletAddress, asset);
-  if (balance < requiredUsdc) {
-    throw new AppError("insufficient_balance", { detail: "USDC balance below card price" });
-  }
-
-  const transfer = await buildUsdcTransfer({
-    payer: input.walletAddress,
-    treasury: env().TREASURY_WALLET,
-    usdcMint: asset.mint,
-    usdcDecimals: asset.decimals,
-    amount: requiredUsdc,
-    reference: `${input.categoryId}:${input.cardId}`,
-  });
-
+function quoteDirectUsdc(requiredUsdc: bigint, suffix: bigint): Settlement {
   return {
-    payAmount: requiredUsdc,
-    transaction: transfer.transaction,
+    payAmount: requiredUsdc + suffix,
     routeLabel: null,
     jupiterRequestId: null,
-    networkFeeLamports: transfer.estimatedFeeLamports,
+    networkFeeLamports: 0n,
     expectedUsdc: requiredUsdc,
     guaranteedUsdc: requiredUsdc,
     slippageBps: null,
@@ -163,39 +148,41 @@ async function quoteDirectUsdc(args: {
   };
 }
 
+async function quotePaymentAsset(args: {
+  asset: AssetConfig;
+  usdc: AssetConfig;
+  requiredUsdc: bigint;
+  suffix: bigint;
+}): Promise<Settlement> {
+  try {
+    return await quoteViaJupiter(args);
+  } catch (error) {
+    if (isAppError(error) && (error.code === "no_route" || error.code === "liquidity_unavailable")) {
+      return quoteDirectFromSpot(args);
+    }
+    throw error;
+  }
+}
+
 async function quoteViaJupiter(args: {
   asset: AssetConfig;
   usdc: AssetConfig;
-  input: CreateQuoteInput;
   requiredUsdc: bigint;
+  suffix: bigint;
 }): Promise<Settlement> {
-  const { asset, usdc, input, requiredUsdc } = args;
+  const { asset, usdc, requiredUsdc, suffix } = args;
 
   const quote = await quoteCoffeePayment({
     asset,
     usdcMint: usdc.mint,
     requiredUsdc,
-    taker: input.walletAddress,
-    receiver: env().TREASURY_WALLET,
-  });
-
-  if (!quote.transaction) {
-    throw new AppError("no_route", { detail: "Jupiter returned no transaction to sign" });
-  }
-
-  await assertWalletCanPay({
-    walletAddress: input.walletAddress,
-    asset,
-    amount: quote.inAmount,
-    networkFeeLamports: quote.networkFeeLamports,
   });
 
   return {
-    payAmount: quote.inAmount,
-    transaction: quote.transaction,
+    payAmount: quote.inAmount + suffix,
     routeLabel: quote.routeLabel,
     jupiterRequestId: quote.requestId,
-    networkFeeLamports: quote.networkFeeLamports,
+    networkFeeLamports: 0n,
     expectedUsdc: quote.expectedUsdc,
     guaranteedUsdc: quote.guaranteedUsdc,
     slippageBps: quote.slippageBps,
@@ -203,63 +190,97 @@ async function quoteViaJupiter(args: {
   };
 }
 
-/**
- * Distinguishes "you don't hold enough of this token" from "you hold enough
- * but have no SOL for the fee", because the fixes are completely different.
- */
-async function assertWalletCanPay(args: {
-  walletAddress: string;
+/** Direct send-to-treasury amount from a spot USD price (used for xStocks). */
+async function quoteDirectFromSpot(args: {
   asset: AssetConfig;
-  amount: bigint;
-  networkFeeLamports: bigint;
-}): Promise<void> {
-  const { walletAddress, asset, amount, networkFeeLamports } = args;
+  usdc: AssetConfig;
+  requiredUsdc: bigint;
+  suffix: bigint;
+}): Promise<Settlement> {
+  const { asset, usdc, requiredUsdc, suffix } = args;
+  const usdPrice = await getJupiterUsdPrice(asset.mint);
+  const priceUsdc = parseDecimalToBaseUnits(usdPrice.toFixed(usdc.decimals), usdc.decimals);
+  const buffered = addBasisPoints(requiredUsdc, 100);
+  const payAmount = divideCeil(buffered * 10n ** BigInt(asset.decimals), priceUsdc) + suffix;
 
-  if (asset.isNative) {
-    const lamports = await getAssetBalance(walletAddress, asset);
-    if (lamports < amount + networkFeeLamports + LAMPORT_FEE_RESERVE) {
-      if (lamports < amount) {
-        throw new AppError("insufficient_balance", { detail: "SOL balance below swap input" });
-      }
-      throw new AppError("insufficient_sol_for_fees", {
-        detail: "SOL balance leaves nothing for fees",
-      });
-    }
-    return;
-  }
+  return {
+    payAmount,
+    routeLabel: "spot",
+    jupiterRequestId: null,
+    networkFeeLamports: 0n,
+    expectedUsdc: requiredUsdc,
+    guaranteedUsdc: requiredUsdc,
+    slippageBps: 100,
+    routerFeeBps: null,
+  };
+}
 
-  const balance = await getAssetBalance(walletAddress, asset);
-  if (balance < amount) {
-    throw new AppError("insufficient_balance", {
-      detail: `${asset.symbol} balance below swap input`,
+/**
+ * Extra base units from the quote id so two identical cards in the same window
+ * still produce distinct on-chain amounts.
+ */
+function uniqueAmountSuffix(quoteId: string): bigint {
+  const hex = quoteId.replace(/-/g, "").slice(0, 4);
+  const value = BigInt(`0x${hex}`);
+  return value === 0n ? 1n : value;
+}
+
+function solanaPayUrl(args: {
+  recipient: string;
+  amountUi: string;
+  memo: string;
+  splToken?: string;
+}): string {
+  const params = new URLSearchParams();
+  params.set("amount", args.amountUi);
+  if (args.splToken) params.set("spl-token", args.splToken);
+  params.set("memo", args.memo);
+  return `solana:${args.recipient}?${params.toString()}`;
+}
+
+async function qrDataUrl(url: string): Promise<string> {
+  try {
+    return await QRCode.toDataURL(url, {
+      margin: 1,
+      width: 320,
+      errorCorrectionLevel: "M",
+      color: { dark: "#2c2416", light: "#fff8ee" },
     });
-  }
-
-  // Zero network fee means Jupiter is sponsoring it, so no SOL is needed.
-  if (networkFeeLamports > 0n) {
-    const sol = await getAssetBalance(walletAddress, { ...asset, isNative: true });
-    if (sol < networkFeeLamports + LAMPORT_FEE_RESERVE) {
-      throw new AppError("insufficient_sol_for_fees", {
-        detail: "wallet holds too little SOL for the network fee",
-      });
-    }
+  } catch {
+    return "";
   }
 }
 
-function toCheckoutQuote(args: {
+async function toCheckoutQuote(args: {
   quote: QuoteRow;
   offer: CoffeeOffer;
   asset: AssetConfig;
   settlement: Settlement;
-}): CheckoutQuote {
-  const { quote, offer, asset, settlement } = args;
+  paymentMemo: string;
+  receiptEmail: string | null;
+}): Promise<CheckoutQuote> {
+  const { quote, offer, asset, settlement, paymentMemo, receiptEmail } = args;
+  const treasuryAddress = env().TREASURY_WALLET;
+  const payAmountUi = toUiAmount(settlement.payAmount, asset.decimals);
+  const payUrl = solanaPayUrl({
+    recipient: treasuryAddress,
+    amountUi: payAmountUi,
+    memo: paymentMemo,
+    splToken: asset.isNative ? undefined : asset.mint,
+  });
 
   return {
     quoteId: quote.id,
     expiresAt: quote.expiresAt.toISOString(),
-    transaction: settlement.transaction,
+    createdAt: quote.createdAt.toISOString(),
     asset: { symbol: asset.symbol, label: asset.label, decimals: asset.decimals },
     payAmount: settlement.payAmount.toString(),
+    payAmountUi,
+    treasuryAddress,
+    paymentMemo,
+    solanaPayUrl: payUrl,
+    qrDataUrl: await qrDataUrl(payUrl),
+    receiptEmail,
     card: {
       name: offer.name,
       categoryName: offer.categoryName,
@@ -285,7 +306,6 @@ function scaleUsd(amountUsd: bigint, usdcDecimals: number): bigint {
     return amountUsd * 10n ** BigInt(usdcDecimals - USD_DECIMALS);
   }
   const divisor = 10n ** BigInt(USD_DECIMALS - usdcDecimals);
-  // Round up: never quote less than the card costs.
   return (amountUsd + divisor - 1n) / divisor;
 }
 
@@ -310,10 +330,19 @@ export function sanitiseName(value: string | null | undefined): string | null {
   return cleaned || null;
 }
 
+export function sanitiseEmail(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const cleaned = value.normalize("NFKC").trim().toLowerCase();
+  if (!cleaned) return null;
+  if (cleaned.length > RECEIPT_EMAIL_MAX_LENGTH || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned)) {
+    throw new AppError("invalid_request", { detail: "email" });
+  }
+  return cleaned;
+}
+
 function stripUnsafe(value: string): string {
   return value
     .normalize("NFKC")
-    // Control characters, zero-width joiners, and bidi overrides.
     .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u206F]/g, "")
     .replace(/[<>]/g, "")
     .replace(/\s+/g, " ")

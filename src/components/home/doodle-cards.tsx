@@ -1,6 +1,11 @@
 /** Shared pen: warm ink, slightly shaky paths, cream paper. */
 
-type DoodleProps = { note?: string; valueLabel?: string };
+type DoodleProps = {
+  note?: string;
+  valueLabel?: string;
+  paper?: string;
+  stampRotate?: number;
+};
 
 function Frame({ fill }: { fill: string }) {
   return (
@@ -82,10 +87,10 @@ function SirenStamp({
 }
 
 /** $5 — one cozy mug. */
-export function DoodleCupCard({ note = "for you", valueLabel }: DoodleProps = {}) {
+export function DoodleCupCard({ note = "for you", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#fbf3e4" />
+      <Frame fill={paper ?? "#fbf3e4"} />
       <path
         d="M236 186c4-8 156-10 162 8v96c-6 46-152 50-160 6V186Z"
         fill="#f0d9bf"
@@ -105,7 +110,7 @@ export function DoodleCupCard({ note = "for you", valueLabel }: DoodleProps = {}
       <path d="M318 160c0-28 18-24 14-46" fill="none" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
       <path d="M354 168c6-22 18-18 14-40" fill="none" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
       <Spark x={142} y={278} />
-      <SirenStamp x={488} y={70} rotate={-9} />
+      <SirenStamp x={488} y={70} rotate={stampRotate ?? -9} />
       <Note x={64} y={118}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -113,10 +118,10 @@ export function DoodleCupCard({ note = "for you", valueLabel }: DoodleProps = {}
 }
 
 /** $10 — two beans. */
-export function DoodleBeanCard({ note = "sip sip", valueLabel }: DoodleProps = {}) {
+export function DoodleBeanCard({ note = "sip sip", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#e7f0d8" />
+      <Frame fill={paper ?? "#e7f0d8"} />
       <path
         d="M214 168c-8-36 28-62 68-48 38 14 54 58 28 90-24 30-70 22-88-8-10-16-12-24-8-34Z"
         fill="#7a5340"
@@ -143,7 +148,7 @@ export function DoodleBeanCard({ note = "sip sip", valueLabel }: DoodleProps = {
         strokeWidth="4"
         strokeLinecap="round"
       />
-      <SirenStamp x={498} y={68} rotate={7} />
+      <SirenStamp x={498} y={68} rotate={stampRotate ?? 7} />
       <Note x={58} y={114}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -151,10 +156,10 @@ export function DoodleBeanCard({ note = "sip sip", valueLabel }: DoodleProps = {
 }
 
 /** $25 — two cups, a toast. */
-export function DoodleTwoCupsCard({ note = "on me", valueLabel }: DoodleProps = {}) {
+export function DoodleTwoCupsCard({ note = "on me", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#f6ddd0" />
+      <Frame fill={paper ?? "#f6ddd0"} />
       <path
         d="M176 196c2-8 108-8 112 8v82c-4 38-108 42-112 4V196Z"
         fill="#f4ead8"
@@ -191,7 +196,7 @@ export function DoodleTwoCupsCard({ note = "on me", valueLabel }: DoodleProps = 
         strokeLinecap="round"
       />
       <Spark x={128} y={116} />
-      <SirenStamp x={500} y={66} rotate={-6} />
+      <SirenStamp x={500} y={66} rotate={stampRotate ?? -6} />
       <Note x={56} y={112}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -199,10 +204,10 @@ export function DoodleTwoCupsCard({ note = "on me", valueLabel }: DoodleProps = 
 }
 
 /** $50 — wrapped gift. */
-export function DoodleGiftCard({ note = "yours", valueLabel }: DoodleProps = {}) {
+export function DoodleGiftCard({ note = "yours", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#dce8d4" />
+      <Frame fill={paper ?? "#dce8d4"} />
       <path
         d="M206 186h228v136c0 10-10 14-18 14H222c-10 0-16-6-16-16V186Z"
         fill="#f4ead8"
@@ -227,7 +232,7 @@ export function DoodleGiftCard({ note = "yours", valueLabel }: DoodleProps = {})
         strokeLinecap="round"
       />
       <Spark x={136} y={298} />
-      <SirenStamp x={496} y={66} rotate={8} />
+      <SirenStamp x={496} y={66} rotate={stampRotate ?? 8} />
       <Note x={58} y={108}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -235,10 +240,10 @@ export function DoodleGiftCard({ note = "yours", valueLabel }: DoodleProps = {})
 }
 
 /** Extra — mug with a heart in the steam. */
-export function DoodleHeartSteamCard({ note = "warm", valueLabel }: DoodleProps = {}) {
+export function DoodleHeartSteamCard({ note = "warm", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#f3e4d4" />
+      <Frame fill={paper ?? "#f3e4d4"} />
       <path
         d="M250 208c0-8 140-8 146 6v88c-4 44-142 48-148 4V208Z"
         fill="#ead2bc"
@@ -260,7 +265,7 @@ export function DoodleHeartSteamCard({ note = "warm", valueLabel }: DoodleProps 
         strokeLinejoin="round"
       />
       <Spark x={150} y={120} />
-      <SirenStamp x={498} y={68} rotate={-7} />
+      <SirenStamp x={498} y={68} rotate={stampRotate ?? -7} />
       <Note x={62} y={114}>{note}</Note>
       <ValueMark label={valueLabel} />
     </svg>
@@ -268,10 +273,10 @@ export function DoodleHeartSteamCard({ note = "warm", valueLabel }: DoodleProps 
 }
 
 /** Extra — late cup under a moon. */
-export function DoodleMoonCard({ note = "later", valueLabel }: DoodleProps = {}) {
+export function DoodleMoonCard({ note = "later", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill="#e4ebe3" />
+      <Frame fill={paper ?? "#e4ebe3"} />
       <path
         d="M430 128c-28-4-48 22-40 48 8 24 38 34 58 18 4-4 8-10 8-16-22 4-40-12-36-32 2-12 12-18 22-18-4-4-8-2-12 0Z"
         fill="none"
@@ -280,7 +285,7 @@ export function DoodleMoonCard({ note = "later", valueLabel }: DoodleProps = {})
         strokeLinejoin="round"
       />
       <Spark x={388} y={96} />
-      <SirenStamp x={72} y={74} rotate={6} size={76} />
+      <SirenStamp x={72} y={74} rotate={stampRotate ?? 6} size={76} />
       <path
         d="M228 214c2-8 150-8 156 8v84c-6 42-148 46-156 4V214Z"
         fill="#d7e2d0"
@@ -302,17 +307,165 @@ export function DoodleMoonCard({ note = "later", valueLabel }: DoodleProps = {})
   );
 }
 
-export const DOODLE_KINDS = ["cup", "beans", "twoCups", "gift", "heartSteam", "moon"] as const;
+/** $30 — croissant. */
+export function DoodlePastryCard({ note = "treat", valueLabel, paper, stampRotate }: DoodleProps = {}) {
+  return (
+    <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
+      <Frame fill={paper ?? "#f8e6c8"} />
+      <path
+        d="M198 214c18-56 86-78 148-52 52 22 86 70 58 104-22 28-78 18-128 8-46-10-90-8-78-60Z"
+        fill="#e8b56a"
+        stroke="#2c2416"
+        strokeWidth="6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M236 206c28-18 70-16 98 8"
+        fill="none"
+        stroke="#2c2416"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M258 232c24-12 62-10 86 8"
+        fill="none"
+        stroke="#2c2416"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <Spark x={148} y={118} />
+      <SirenStamp x={496} y={68} rotate={stampRotate ?? -5} />
+      <Note x={58} y={112}>{note}</Note>
+      <ValueMark label={valueLabel} />
+    </svg>
+  );
+}
+
+/** Extra — to-go cup. */
+export function DoodleTakeawayCard({ note = "to go", valueLabel, paper, stampRotate }: DoodleProps = {}) {
+  return (
+    <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
+      <Frame fill={paper ?? "#efe4d2"} />
+      <path
+        d="M246 168h148l-16 148c-4 28-116 30-122 2L246 168Z"
+        fill="#f4ead8"
+        stroke="#2c2416"
+        strokeWidth="6"
+        strokeLinejoin="round"
+      />
+      <path d="M236 168h168" stroke="#2c2416" strokeWidth="6" strokeLinecap="round" />
+      <path d="M262 168v-22h116v22" fill="#ead2bc" stroke="#2c2416" strokeWidth="5" />
+      <path d="M268 230h104" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
+      <path d="M274 258h92" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
+      <Spark x={150} y={286} />
+      <SirenStamp x={494} y={66} rotate={stampRotate ?? 6} />
+      <Note x={56} y={114}>{note}</Note>
+      <ValueMark label={valueLabel} />
+    </svg>
+  );
+}
+
+/** Extra — cup with a cardboard sleeve. */
+export function DoodleSleeveCard({ note = "hold", valueLabel, paper, stampRotate }: DoodleProps = {}) {
+  return (
+    <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
+      <Frame fill={paper ?? "#e8f0e4"} />
+      <path
+        d="M248 176c2-8 144-8 150 8v98c-4 42-146 46-154 4V176Z"
+        fill="#f4ead8"
+        stroke="#2c2416"
+        strokeWidth="6"
+      />
+      <path
+        d="M398 214c38 4 42 50 2 60"
+        fill="none"
+        stroke="#2c2416"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M246 228h156c4 0 6 18-2 22H250c-8-2-8-18-4-22Z"
+        fill="#d8c4a4"
+        stroke="#2c2416"
+        strokeWidth="5"
+      />
+      <path d="M286 166c2-18 14-16 12-32" fill="none" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M326 162c0-20 14-16 12-34" fill="none" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
+      <SirenStamp x={498} y={66} rotate={stampRotate ?? -8} />
+      <Note x={58} y={112}>{note}</Note>
+      <ValueMark label={valueLabel} />
+    </svg>
+  );
+}
+
+/** Extra — stacked cards. */
+export function DoodleStackCard({ note = "stack", valueLabel, paper, stampRotate }: DoodleProps = {}) {
+  return (
+    <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
+      <Frame fill={paper ?? "#f1e0d4"} />
+      <path
+        d="M214 150h196l18 108c2 16-8 22-22 22H230c-14 0-22-8-22-22Z"
+        fill="#ead2bc"
+        stroke="#2c2416"
+        strokeWidth="6"
+      />
+      <path
+        d="M198 176h196l18 108c2 16-8 22-22 22H214c-14 0-22-8-22-22Z"
+        fill="#f4ead8"
+        stroke="#2c2416"
+        strokeWidth="6"
+      />
+      <path d="M226 214h140" stroke="#2c2416" strokeWidth="4" strokeLinecap="round" />
+      <path d="M226 242h108" stroke="#2c2416" strokeWidth="3.5" strokeLinecap="round" />
+      <Spark x={140} y={300} />
+      <SirenStamp x={490} y={64} rotate={stampRotate ?? 9} />
+      <Note x={56} y={108}>{note}</Note>
+      <ValueMark label={valueLabel} />
+    </svg>
+  );
+}
+
+export const DOODLE_KINDS = [
+  "cup",
+  "beans",
+  "twoCups",
+  "gift",
+  "heartSteam",
+  "moon",
+  "pastry",
+  "takeaway",
+  "sleeve",
+  "stack",
+] as const;
 export type DoodleKind = (typeof DOODLE_KINDS)[number];
 
 const VALUE_KIND: Record<number, DoodleKind> = {
   5: "cup",
   10: "beans",
-  25: "twoCups",
-  50: "gift",
   15: "heartSteam",
   20: "moon",
+  25: "twoCups",
+  30: "pastry",
+  40: "takeaway",
+  50: "gift",
+  75: "sleeve",
+  100: "stack",
 };
+
+const KIND_NOTES: Record<DoodleKind, string> = {
+  cup: "for you",
+  beans: "sip sip",
+  twoCups: "on me",
+  gift: "yours",
+  heartSteam: "warm",
+  moon: "later",
+  pastry: "treat",
+  takeaway: "to go",
+  sleeve: "hold",
+  stack: "stack",
+};
+
+const PAPERS = ["#fbf3e4", "#e7f0d8", "#f6ddd0", "#dce8d4", "#f3e4d4", "#e4ebe3", "#f8e6c8", "#efe4d2", "#e8f0e4", "#f1e0d4"];
 
 function hashSeed(seed: string) {
   let hash = 0;
@@ -322,29 +475,54 @@ function hashSeed(seed: string) {
   return Math.abs(hash);
 }
 
-export function doodleKindForOffer(faceValueUsd?: string | null, seed?: string): DoodleKind {
-  if (faceValueUsd) {
-    try {
-      const dollars = Number(BigInt(faceValueUsd) / 1_000_000n);
-      const mapped = VALUE_KIND[dollars];
-      if (mapped) return mapped;
-    } catch {
-      // Fall through to the seed.
-    }
+function dollarsFromFace(faceValueUsd?: string | null): number | null {
+  if (!faceValueUsd) return null;
+  try {
+    return Number(BigInt(faceValueUsd) / 1_000_000n);
+  } catch {
+    return null;
   }
+}
 
-  return DOODLE_KINDS[hashSeed(seed ?? "starbucks") % DOODLE_KINDS.length]!;
+export function doodleKindForOffer(faceValueUsd?: string | null, seed?: string): DoodleKind {
+  const dollars = dollarsFromFace(faceValueUsd);
+  const canonical = dollars !== null ? VALUE_KIND[dollars] : undefined;
+  if (canonical) return canonical;
+
+  return DOODLE_KINDS[hashSeed(seed ?? String(dollars ?? "starbucks")) % DOODLE_KINDS.length]!;
+}
+
+export type DoodleAppearance = {
+  kind: DoodleKind;
+  note: string;
+  paper: string;
+  stampRotate: number;
+};
+
+export function doodleAppearance(faceValueUsd?: string | null, seed?: string): DoodleAppearance {
+  const kind = doodleKindForOffer(faceValueUsd, seed);
+  const hash = hashSeed(`${kind}:${seed ?? ""}:${faceValueUsd ?? ""}`);
+  return {
+    kind,
+    note: KIND_NOTES[kind],
+    paper: PAPERS[hash % PAPERS.length]!,
+    stampRotate: (hash % 19) - 9,
+  };
 }
 
 export function DoodleThumb({
   kind,
   note,
   valueLabel,
+  paper,
+  stampRotate,
   className,
 }: {
   kind: DoodleKind;
   note?: string;
   valueLabel?: string;
+  paper?: string;
+  stampRotate?: number;
   className?: string;
 }) {
   const Card = {
@@ -354,11 +532,15 @@ export function DoodleThumb({
     gift: DoodleGiftCard,
     heartSteam: DoodleHeartSteamCard,
     moon: DoodleMoonCard,
+    pastry: DoodlePastryCard,
+    takeaway: DoodleTakeawayCard,
+    sleeve: DoodleSleeveCard,
+    stack: DoodleStackCard,
   }[kind];
 
   return (
     <div className={className}>
-      <Card note={note ?? ""} valueLabel={valueLabel} />
+      <Card note={note ?? ""} valueLabel={valueLabel} paper={paper} stampRotate={stampRotate} />
     </div>
   );
 }

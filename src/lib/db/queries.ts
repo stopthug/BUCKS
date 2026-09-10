@@ -37,7 +37,7 @@ export interface ProductRow {
 export interface QuoteRow {
   id: string;
   userId: string;
-  walletAddress: string;
+  walletAddress: string | null;
   productId: string;
   intent: OrderIntent;
   paymentAsset: string;
@@ -51,8 +51,11 @@ export interface QuoteRow {
   unsignedTransaction: string | null;
   senderName: string | null;
   giftMessage: string | null;
+  receiptEmail: string | null;
+  paymentMemo: string | null;
   expiresAt: Date;
   consumedAt: Date | null;
+  createdAt: Date;
 }
 
 export interface OrderRow {
@@ -123,7 +126,7 @@ function mapQuote(row: any): QuoteRow {
   return {
     id: row.id,
     userId: row.user_id,
-    walletAddress: row.wallet_address,
+    walletAddress: row.wallet_address ?? null,
     productId: row.product_id,
     intent: row.intent,
     paymentAsset: row.payment_asset,
@@ -137,8 +140,11 @@ function mapQuote(row: any): QuoteRow {
     unsignedTransaction: row.unsigned_transaction ?? null,
     senderName: row.sender_name ?? null,
     giftMessage: row.gift_message ?? null,
+    receiptEmail: row.receipt_email ?? null,
+    paymentMemo: row.payment_memo ?? null,
     expiresAt: row.expires_at,
     consumedAt: row.consumed_at ?? null,
+    createdAt: row.created_at,
   };
 }
 
@@ -225,8 +231,9 @@ export async function getProduct(id: string): Promise<ProductRow | null> {
 // ---------------------------------------------------------------------------
 
 export async function insertQuote(input: {
+  id?: string;
   userId: string;
-  walletAddress: string;
+  walletAddress?: string | null;
   productId: string;
   intent: OrderIntent;
   paymentAsset: string;
@@ -240,20 +247,23 @@ export async function insertQuote(input: {
   unsignedTransaction: string | null;
   senderName: string | null;
   giftMessage: string | null;
+  receiptEmail?: string | null;
+  paymentMemo?: string | null;
   ttlSeconds: number;
 }): Promise<QuoteRow> {
   const row = await queryOne(
     `INSERT INTO payment_quotes
-       (user_id, wallet_address, product_id, intent, payment_asset, payment_mint,
+       (id, user_id, wallet_address, product_id, intent, payment_asset, payment_mint,
         payment_amount, required_usdc, provider_price_usd, route_label,
         jupiter_request_id, network_fee_lamports, unsigned_transaction,
-        sender_name, gift_message, expires_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,
-             now() + ($16 || ' seconds')::interval)
+        sender_name, gift_message, receipt_email, payment_memo, expires_at)
+     VALUES (COALESCE($1::uuid, gen_random_uuid()),$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+             now() + ($19 || ' seconds')::interval)
      RETURNING *`,
     [
+      input.id ?? null,
       input.userId,
-      input.walletAddress,
+      input.walletAddress ?? null,
       input.productId,
       input.intent,
       input.paymentAsset,
@@ -267,6 +277,8 @@ export async function insertQuote(input: {
       input.unsignedTransaction,
       input.senderName,
       input.giftMessage,
+      input.receiptEmail ?? null,
+      input.paymentMemo ?? null,
       input.ttlSeconds,
     ],
   );
@@ -328,7 +340,7 @@ export async function releaseQuote(quoteId: string): Promise<void> {
 export async function insertPayment(input: {
   quoteId: string;
   userId: string;
-  walletAddress: string;
+  walletAddress: string | null;
   asset: string;
   mint: string;
   amount: bigint;
@@ -488,6 +500,18 @@ export async function getOrder(orderId: string): Promise<OrderRow | null> {
   return row ? mapOrder(row) : null;
 }
 
+export async function getOrderByQuoteId(quoteId: string): Promise<OrderRow | null> {
+  const row = await queryOne(`SELECT * FROM orders WHERE quote_id = $1 ORDER BY created_at ASC LIMIT 1`, [
+    quoteId,
+  ]);
+  return row ? mapOrder(row) : null;
+}
+
+export async function getGiftForOrder(orderId: string): Promise<GiftRow | null> {
+  const row = await queryOne(`SELECT * FROM coffee_gifts WHERE order_id = $1`, [orderId]);
+  return row ? mapGift(row) : null;
+}
+
 /** Owner-scoped read. Used by every route that can expose order contents. */
 export async function getOrderForUser(orderId: string, userId: string): Promise<OrderRow> {
   const row = await queryOne(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [
@@ -588,7 +612,12 @@ export async function insertGift(input: {
     `INSERT INTO coffee_gifts
        (order_id, sender_user_id, sender_name, message, claim_token_hash, encrypted_claim_token, status)
      VALUES ($1,$2,$3,$4,$5,$6,$7)
-     ON CONFLICT (order_id) DO UPDATE SET status = EXCLUDED.status
+     ON CONFLICT (order_id) DO UPDATE
+       SET status = CASE
+         WHEN coffee_gifts.status = 'claimed' THEN coffee_gifts.status
+         WHEN coffee_gifts.status = 'ready' AND EXCLUDED.status = 'pending' THEN coffee_gifts.status
+         ELSE EXCLUDED.status
+       END
      RETURNING *`,
     [
       input.orderId,

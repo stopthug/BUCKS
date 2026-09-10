@@ -1,9 +1,11 @@
-import { doodleKindForOffer, DoodleThumb } from "@/components/home/doodle-cards";
+import { doodleAppearance, DoodleThumb } from "@/components/home/doodle-cards";
 import { cn } from "@/lib/cn";
 import { formatUsd } from "@/lib/money";
 
 /**
  * Gift-card cover. The siren is drawn into the doodle itself.
+ * Face value picks the scene; seed (id + region + name) tints paper and stamp
+ * so two SKUs never share a thumbnail.
  */
 export function CardArt({
   alt,
@@ -20,7 +22,7 @@ export function CardArt({
   showValue?: boolean;
   priority?: boolean;
 }) {
-  const kind = doodleKindForOffer(faceValueUsd, seed ?? alt);
+  const look = doodleAppearance(faceValueUsd, seed ?? alt);
   const valueLabel =
     showValue && faceValueUsd
       ? formatUsd(BigInt(faceValueUsd)).replace(/\.00$/, "")
@@ -28,7 +30,13 @@ export function CardArt({
 
   return (
     <div className={cn("relative aspect-[16/10] overflow-visible bg-transparent", className)}>
-      <DoodleThumb kind={kind} valueLabel={valueLabel} />
+      <DoodleThumb
+        kind={look.kind}
+        note={look.note}
+        paper={look.paper}
+        stampRotate={look.stampRotate}
+        valueLabel={valueLabel}
+      />
     </div>
   );
 }
