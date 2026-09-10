@@ -41,10 +41,6 @@ export interface MenuCategory {
   offers: MenuOffer[];
 }
 
-export function isCoffeeBrand(name: string): boolean {
-  return /\bstarbucks\b|\bsbux\b/i.test(name);
-}
-
 /** Deduplicates by face value, for surfaces that only show denominations. */
 export function distinctDenominations(offers: MenuOffer[]): MenuOffer[] {
   const seen = new Set<string>();
@@ -80,35 +76,4 @@ export function groupOffersByCategory(offers: MenuOffer[]): MenuCategory[] {
   }
 
   return [...groups.values()];
-}
-
-/** One card per brand for the homepage grid — prefer a $25 face value. */
-export function featuredShowcase(offers: MenuOffer[]): MenuOffer[] {
-  const target = 25_000_000n;
-
-  return groupOffersByCategory(offers).flatMap((group) => {
-    const first = group.offers[0];
-    if (!first) return [];
-
-    let best = first;
-    let bestDistance = distance(faceOf(best), target);
-
-    for (const offer of group.offers.slice(1)) {
-      const next = distance(faceOf(offer), target);
-      if (next < bestDistance) {
-        best = offer;
-        bestDistance = next;
-      }
-    }
-
-    return [best];
-  });
-}
-
-function faceOf(offer: MenuOffer): bigint {
-  return BigInt(offer.faceValueUsd ?? offer.providerPriceUsd);
-}
-
-function distance(value: bigint, target: bigint): bigint {
-  return value > target ? value - target : target - value;
 }

@@ -30,7 +30,7 @@ export function GiftFields({
           id="sender-name"
           value={senderName}
           onChange={(event) => onSenderName(event.target.value.slice(0, GIFT_NAME_MAX_LENGTH))}
-          placeholder="harshal"
+          placeholder="your name"
           autoComplete="off"
           className={fieldClass}
         />

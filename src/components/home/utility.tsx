@@ -4,18 +4,18 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
 const STEPS = [
   {
     number: "01",
-    title: "pick a card.",
-    body: "Starbucks, Amazon, Steam, Netflix and more. every thumbnail is a real card we can deliver.",
+    title: "pick a Starbucks card.",
+    body: "choose a value from live inventory. if it isn't really in stock, it isn't on the menu.",
   },
   {
     number: "02",
     title: "pay with crypto.",
-    body: "connect a wallet, choose $BUCKS, SOL or USDC, and approve one transaction. 0% platform fee.",
+    body: "connect a wallet, choose $BUCKS, SBUXx, SOL or USDC, and approve one transaction. 0% platform fee.",
   },
   {
     number: "03",
-    title: "get the code — or send it.",
-    body: "reveal the card yourself, or turn it into a link anyone can open. no wallet needed to claim.",
+    title: "get the card — or send it.",
+    body: "reveal the code yourself, or turn it into a link anyone can open. no wallet needed to claim.",
   },
 ] as const;
 
@@ -26,11 +26,12 @@ export function Utility() {
         <Reveal>
           <div className="max-w-2xl">
             <h2 className="text-[clamp(2rem,6vw,3.75rem)] leading-[1] font-medium tracking-[-0.04em]">
-              <span className="block text-cream-50">three steps.</span>
-              <span className="font-display block text-cream-500 italic">that’s it.</span>
+              <span className="block text-cream-50">internet money.</span>
+              <span className="font-display block text-cream-500 italic">real coffee.</span>
             </h2>
             <p className="mt-6 max-w-lg text-[0.9375rem] leading-relaxed text-cream-400">
-              buy a gift card with your wallet, or send one to a friend. nothing else to learn.
+              buy a Starbucks card with your wallet, or send one to a friend. that&rsquo;s the
+              whole product.
             </p>
           </div>
         </Reveal>
@@ -61,20 +62,20 @@ export function Statement() {
           <GlassCard className="p-8 text-center sm:p-14">
             <p className="label-mono">the idea</p>
             <p className="font-display mt-6 text-[clamp(1.75rem,5.5vw,3.25rem)] leading-[1.05] tracking-[-0.02em] text-cream-50">
-              A coffee token.
+              A coffee stock.
               <br />
-              Real gift cards.
+              A coffee card.
               <span className="text-cream-500 italic"> One tap.</span>
             </p>
 
             <div className="mt-12 grid gap-8 text-left sm:grid-cols-3">
               <Column
-                title="coffee"
-                body="$BUCKS is paired with Starbucks stock. spend it on an actual Starbucks card."
+                title="the pair"
+                body="$BUCKS trades against SBUXx, tokenized Starbucks stock on Solana. the story and the spend point at the same place."
               />
               <Column
-                title="gift cards"
-                body="Amazon, Steam, Netflix and more, from live provider inventory. no fake catalog."
+                title="the card"
+                body="Starbucks gift cards from live provider inventory. no synthetic catalog, no invented codes."
               />
               <Column
                 title="settlement"

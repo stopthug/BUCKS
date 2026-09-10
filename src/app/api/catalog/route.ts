@@ -10,9 +10,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * The live gift-card catalog for this reseller account, plus whether we can
+ * The live Starbucks catalog for this reseller account, plus whether we can
  * actually fulfil right now. `available: false` is a real answer — the UI shows
- * "gift cards are temporarily unavailable" rather than placeholder inventory.
+ * "coffee cards are temporarily unavailable" rather than placeholder inventory.
  */
 export async function GET(request: Request) {
   return handle("catalog", async () => {

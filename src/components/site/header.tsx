@@ -17,8 +17,7 @@ import { cn } from "@/lib/cn";
 
 const LINKS = [
   { href: "/coffee", label: "coffee" },
-  { href: "/#cards", label: "cards" },
-  { href: "/gift", label: "send" },
+  { href: "/gift", label: "gift" },
   { href: "/trade", label: "trade" },
   { href: "/about", label: "about" },
 ] as const;

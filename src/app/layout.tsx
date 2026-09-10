@@ -18,17 +18,17 @@ const display = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: {
-    default: "$BUCKS — buy gift cards with crypto.",
+    default: "$BUCKS — coffee meets stocks.",
     template: "%s — $BUCKS",
   },
   description:
-    "Buy Starbucks, Amazon, Steam, Netflix and more with $BUCKS, SOL or USDC. Keep the code, or send it as a link.",
+    "$BUCKS is paired with Starbucks stock on Solana. Spend $BUCKS, SBUXx, SOL or USDC on a real Starbucks card.",
   openGraph: {
-    title: "$BUCKS — buy gift cards with crypto.",
-    description: "Real gift cards. Pay with crypto. Keep the code, or send a link.",
+    title: "$BUCKS — coffee meets stocks.",
+    description: "Spend Starbucks stock at Starbucks. Buy a coffee card, or send one to a friend.",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "$BUCKS — buy gift cards with crypto." },
+  twitter: { card: "summary_large_image", title: "$BUCKS — coffee meets stocks." },
   robots: { index: true, follow: true },
 };
 

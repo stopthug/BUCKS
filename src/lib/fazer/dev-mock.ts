@@ -59,74 +59,10 @@ const MOCK_CATEGORIES: MockCategory[] = [
   },
   {
     category_id: "dev-amazon",
-    name: "Amazon US",
-    note: "development fixture",
-    imageurl: "/cards/amazon.svg",
-    offers: [
-      { card_id: "dev-amzn-10", name: "Amazon US $10", price_usd: "10.1500", stock: 80 },
-      { card_id: "dev-amzn-25", name: "Amazon US $25", price_usd: "25.3800", stock: 54 },
-      { card_id: "dev-amzn-50", name: "Amazon US $50", price_usd: "50.7500", stock: 21 },
-    ],
-  },
-  {
-    category_id: "dev-steam",
-    name: "Steam US",
-    note: "development fixture",
-    imageurl: "/cards/steam.svg",
-    offers: [
-      { card_id: "dev-steam-20", name: "Steam Wallet US $20", price_usd: "20.4000", stock: 33 },
-      { card_id: "dev-steam-50", name: "Steam Wallet US $50", price_usd: "51.0000", stock: 18 },
-    ],
-  },
-  {
-    category_id: "dev-netflix",
-    name: "Netflix US",
-    note: "development fixture",
-    imageurl: "/cards/netflix.svg",
-    offers: [
-      { card_id: "dev-nfx-25", name: "Netflix US $25", price_usd: "25.6000", stock: 16 },
-      { card_id: "dev-nfx-50", name: "Netflix US $50", price_usd: "51.2000", stock: 9 },
-    ],
-  },
-  {
-    category_id: "dev-spotify",
-    name: "Spotify US",
-    note: "development fixture",
-    imageurl: "/cards/spotify.svg",
-    offers: [
-      { card_id: "dev-spot-10", name: "Spotify US $10", price_usd: "10.3000", stock: 44 },
-      { card_id: "dev-spot-30", name: "Spotify US $30", price_usd: "30.9000", stock: 22 },
-    ],
-  },
-  {
-    category_id: "dev-apple",
-    name: "Apple US",
-    note: "development fixture",
-    imageurl: "/cards/apple.svg",
-    offers: [
-      { card_id: "dev-aapl-15", name: "App Store & iTunes US $15", price_usd: "15.4500", stock: 27 },
-      { card_id: "dev-aapl-25", name: "App Store & iTunes US $25", price_usd: "25.7500", stock: 19 },
-    ],
-  },
-  {
-    category_id: "dev-google-play",
-    name: "Google Play US",
-    note: "development fixture",
-    imageurl: "/cards/google-play.svg",
-    offers: [
-      { card_id: "dev-gp-10", name: "Google Play US $10", price_usd: "10.2500", stock: 31 },
-      { card_id: "dev-gp-25", name: "Google Play US $25", price_usd: "25.6250", stock: 14 },
-    ],
-  },
-  {
-    category_id: "dev-playstation",
-    name: "PlayStation US",
-    note: "development fixture",
-    imageurl: "/cards/playstation.svg",
-    offers: [
-      { card_id: "dev-psn-25", name: "PlayStation Store US $25", price_usd: "25.8000", stock: 11 },
-      { card_id: "dev-psn-50", name: "PlayStation Store US $50", price_usd: "51.6000", stock: 7 },
-    ],
+    name: "Amazon",
+    note: "development fixture — filtered out of the storefront",
+    imageurl: "/cards/starbucks.svg",
+    offers: [],
   },
 ];
 

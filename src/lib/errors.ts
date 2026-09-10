@@ -15,11 +15,11 @@ export const ERROR_COPY = {
   forbidden: "that isn't yours to open.",
 
   // Provider catalog / fulfillment capacity
-  provider_unconfigured: "gift cards are temporarily unavailable.",
-  starbucks_unavailable: "gift cards are temporarily unavailable.",
-  offer_unavailable: "that card just sold out. pick another one.",
-  out_of_stock: "that card just sold out. pick another one.",
-  provider_balance_low: "gift cards are temporarily unavailable.",
+  provider_unconfigured: "coffee cards are temporarily unavailable.",
+  starbucks_unavailable: "coffee cards are temporarily unavailable.",
+  offer_unavailable: "that card just sold out. pick another value.",
+  out_of_stock: "that card just sold out. pick another value.",
+  provider_balance_low: "coffee purchases are temporarily unavailable.",
   provider_timeout: "our card provider is slow right now. we did not charge you.",
   provider_failed: "the card provider could not complete this order.",
   provider_processing: "your card is still being prepared. this page updates itself.",
@@ -43,8 +43,8 @@ export const ERROR_COPY = {
   payment_pending: "we're still confirming your payment.",
 
   // Gifting / claiming
-  already_claimed: "this gift has already been claimed.",
-  gift_not_ready: "this gift isn't ready yet. check back in a moment.",
+  already_claimed: "this coffee has already been claimed.",
+  gift_not_ready: "this coffee isn't ready yet. check back in a moment.",
   message_too_long: "keep the message under 120 characters.",
 
   // Recovery

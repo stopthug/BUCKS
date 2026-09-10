@@ -4,27 +4,18 @@ import { env, hasFazerCredentials } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import { getCoffeeCatalog, getResellerBalanceUsd } from "@/lib/fazer/catalog";
 import { toAppError } from "@/lib/fazer/client";
-import { isCoffeeBrand, type CoffeeMenu, type MenuOffer } from "@/lib/menu";
+import type { CoffeeMenu, MenuOffer } from "@/lib/menu";
 
 /**
- * Server-render-safe view of the catalog.
+ * Server-render-safe view of the Starbucks menu.
  *
  * Pages call this instead of fetching their own API, so the first paint already
  * has real inventory. It never throws: a missing key, an empty catalog or a
  * provider outage all come back as `available: false` with a reason, which the
- * UI renders as "cards are temporarily unavailable" rather than a crash
+ * UI renders as "coffee cards are temporarily unavailable" rather than a crash
  * or a placeholder price.
  */
-
 export async function loadCoffeeMenu(): Promise<CoffeeMenu> {
-  return loadMenu({ onlyCoffee: true });
-}
-
-export async function loadGiftMenu(): Promise<CoffeeMenu> {
-  return loadMenu({ onlyCoffee: false });
-}
-
-async function loadMenu({ onlyCoffee }: { onlyCoffee: boolean }): Promise<CoffeeMenu> {
   let sandbox = false;
   try {
     sandbox = env().FAZER_DEV_MOCK;
@@ -43,7 +34,6 @@ async function loadMenu({ onlyCoffee }: { onlyCoffee: boolean }): Promise<Coffee
     ]);
 
     const offers = catalog.offers
-      .filter((offer) => (onlyCoffee ? isCoffeeBrand(offer.categoryName) : true))
       .filter((offer) => (resellerBalanceUsd === null ? true : resellerBalanceUsd >= offer.priceUsd))
       .map(
         (offer): MenuOffer => ({

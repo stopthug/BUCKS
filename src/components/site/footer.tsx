@@ -13,12 +13,12 @@ export function Footer() {
         <div className="mt-10 grid gap-10 md:grid-cols-[1.4fr_1fr]">
           <div>
             <p className="text-lg font-medium tracking-[-0.02em] text-cream-100">
-              buy real cards with crypto.
+              coffee meets stocks.
             </p>
             <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-cream-500">
               $BUCKS is an independent community project and is not affiliated with or endorsed by
-              Starbucks Corporation or any other brand shown here. Those names are trademarks of
-              their owners. SBUXx is a third-party tokenized asset. Availability may vary.
+              Starbucks Corporation. Starbucks is a trademark of its respective owner. SBUXx is a
+              third-party tokenized asset. Availability and eligibility may vary.
             </p>
             <p className="mt-4 max-w-xl text-[0.8125rem] leading-relaxed text-cream-500">
               Pairing with SBUXx does not make $BUCKS redeemable for SBUXx, and $BUCKS is not backed
@@ -31,8 +31,7 @@ export function Footer() {
             <nav className="space-y-3">
               <p className="label-mono">product</p>
               <FooterLink href="/coffee">buy coffee</FooterLink>
-              <FooterLink href="/#cards">gift cards</FooterLink>
-              <FooterLink href="/gift">send a card</FooterLink>
+              <FooterLink href="/gift">send a coffee</FooterLink>
               <FooterLink href="/account">account</FooterLink>
             </nav>
             <nav className="space-y-3">
@@ -44,7 +43,7 @@ export function Footer() {
         </div>
 
         <p className="mt-12 text-xs text-cream-500/70">
-          © {new Date().getFullYear()} $BUCKS. coffee, gift cards, crypto.
+          © {new Date().getFullYear()} $BUCKS. spend Starbucks stock at Starbucks.
         </p>
       </div>
     </footer>

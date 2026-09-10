@@ -7,7 +7,7 @@ import { Reveal } from "@/components/ui/reveal";
 export const metadata: Metadata = {
   title: "about",
   description:
-    "$BUCKS is a coffee token on Solana. Buy a Starbucks card, or any other gift card, with crypto.",
+    "$BUCKS is an independent community coffee token on Solana: buy a Starbucks card, or send one.",
 };
 
 export default function AboutPage() {
@@ -18,7 +18,7 @@ export default function AboutPage() {
           <p className="label-mono">about</p>
           <h1 className="mt-4 text-[clamp(2.25rem,7vw,3.5rem)] leading-[0.98] font-medium tracking-[-0.04em]">
             <span className="text-sheen">a coffee token</span>
-            <span className="text-sheen font-display block italic">that buys cards.</span>
+            <span className="text-sheen font-display block italic">that buys coffee.</span>
           </h1>
         </header>
       </Reveal>
@@ -28,13 +28,14 @@ export default function AboutPage() {
           <GlassCard className="p-8">
             <h2 className="text-lg font-medium tracking-[-0.02em] text-cream-50">what this is</h2>
             <p className="mt-4 text-sm leading-relaxed text-cream-400">
-              $BUCKS is a Solana coffee token with a simple job: let you spend crypto on a real
-              gift card. Starbucks is the original idea — coffee stock, coffee card — and the same
-              checkout also sells Amazon, Steam, Netflix and other cards from live inventory.
+              $BUCKS is a Solana coffee token built around one idea: Starbucks stock is tokenized,
+              so the same portfolio that holds it should be able to buy the actual coffee. The site
+              does two things — sell you a Starbucks gift card, or let you buy one for someone else
+              and send it as a link.
             </p>
             <p className="mt-4 text-sm leading-relaxed text-cream-400">
-              There is no staking, no farming, no points, no leaderboard. You pick a card, pay,
-              and get a code. Or you send the card as a link.
+              There is no staking, no farming, no points, no leaderboard. You pick a Starbucks card,
+              pay, and get a code. Or you send the coffee as a link.
             </p>
           </GlassCard>
         </Reveal>
@@ -45,7 +46,7 @@ export default function AboutPage() {
             <ol className="mt-4 space-y-4 text-sm leading-relaxed text-cream-400">
               <li>
                 <span className="text-cream-200">live inventory.</span> Cards come from a
-                third-party reseller API. We look up available categories at runtime and
+                third-party reseller API. We look up available Starbucks categories at runtime and
                 read real stock, real prices, and cover images. Nothing is hardcoded, so if they
                 have none, we show none.
               </li>
@@ -86,7 +87,7 @@ export default function AboutPage() {
             </p>
             <p className="mt-4 text-sm leading-relaxed text-cream-400">
               $BUCKS is not backed by Starbucks shares, is not redeemable for SBUXx, and is not an
-              official anything. It is a token, a website, and a working gift-card button.
+              official anything. It is a token, a website, and a working coffee button.
             </p>
           </GlassCard>
         </Reveal>
@@ -94,10 +95,10 @@ export default function AboutPage() {
         <Reveal delay={0.15}>
           <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-center">
             <ButtonLink href="/coffee" size="lg">
-              buy a card
+              buy coffee
             </ButtonLink>
             <ButtonLink href="/gift" variant="secondary" size="lg">
-              send a gift
+              send a coffee
             </ButtonLink>
           </div>
         </Reveal>

@@ -45,26 +45,27 @@ const ASSET_ORDER = ["BUCKS", "SBUXx", "SOL", "USDC"] as const;
 export function CheckoutFlow({
   menu,
   mode,
-  initialCategoryId,
+  initialCardId,
 }: {
   menu: CoffeeMenu;
   mode: "purchase" | "gift";
-  initialCategoryId?: string;
+  initialCardId?: string;
 }) {
   const { status: walletStatus, address, signTransaction } = useWallet();
   const connected = walletStatus === "connected" && Boolean(address);
 
   const categories = useMemo(() => groupOffersByCategory(menu.offers), [menu.offers]);
+  const initialOffer = useMemo(
+    () => (initialCardId ? (menu.offers.find((entry) => entry.cardId === initialCardId) ?? null) : null),
+    [menu.offers, initialCardId],
+  );
   const defaultCategoryId =
-    initialCategoryId && categories.some((entry) => entry.categoryId === initialCategoryId)
-      ? initialCategoryId
-      : categories.length === 1
-        ? categories[0]?.categoryId
-        : null;
+    initialOffer?.categoryId ??
+    (categories.length === 1 ? categories[0]?.categoryId : null);
 
   const [step, setStep] = useState<Step>("select");
   const [categoryId, setCategoryId] = useState<string | null>(defaultCategoryId ?? null);
-  const [offer, setOffer] = useState<MenuOffer | null>(null);
+  const [offer, setOffer] = useState<MenuOffer | null>(initialOffer);
   const [assetSymbol, setAssetSymbol] = useState<string | null>(null);
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [loadedBalances, setLoadedBalances] = useState<{
@@ -248,16 +249,16 @@ export function CheckoutFlow({
               <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-cream-50">
                 {selectedCategory
                   ? mode === "gift"
-                    ? `send ${selectedCategory.categoryName}.`
-                    : `choose ${selectedCategory.categoryName}.`
+                    ? "how much coffee?"
+                    : "choose your coffee."
                   : mode === "gift"
-                    ? "which card are you sending?"
-                    : "which card do you want?"}
+                    ? "which coffee are you sending?"
+                    : "choose your coffee."}
               </h2>
               <p className="mt-2 text-sm text-cream-500">
                 {selectedCategory
-                  ? "pick a value. we only show amounts that are in stock."
-                  : "live cards from our provider. tap one to pick an amount."}
+                  ? "Starbucks cards from live inventory. pick a value."
+                  : "live Starbucks cards. tap one to pick an amount."}
               </p>
 
               {!selectedCategory ? (
@@ -302,7 +303,7 @@ export function CheckoutFlow({
                       }}
                       className="mt-3 text-[0.8125rem] text-cream-500 transition-colors hover:text-cream-200"
                     >
-                      choose a different card
+                      choose a different value
                     </button>
                   ) : null}
 
@@ -352,7 +353,7 @@ export function CheckoutFlow({
                 disabled={!offer}
                 onClick={() => setStep("pay")}
               >
-                {offer ? "choose payment" : selectedCategory ? "pick a value" : "pick a card"}
+                {offer ? "choose payment" : selectedCategory ? "pick a value" : "pick a coffee"}
               </Button>
             </GlassCard>
           </Panel>
@@ -424,7 +425,7 @@ export function CheckoutFlow({
                         {busy === "signing"
                           ? "check your wallet"
                           : mode === "gift"
-                            ? "send gift"
+                            ? "send coffee"
                             : "confirm with wallet"}
                       </Button>
 
@@ -601,7 +602,7 @@ function Result({
     <div className="space-y-5">
       <div className="text-center">
         <h2 className="text-[clamp(2rem,7vw,2.75rem)] leading-none font-medium tracking-[-0.035em] text-cream-50">
-          card secured.
+          coffee secured.
         </h2>
         <p className="mt-3 text-sm text-cream-500">
           {offer?.categoryName ?? "Starbucks"} gift card · {value}
@@ -630,13 +631,13 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
   const [copied, setCopied] = useState(false);
   const url = settlement.claimUrl ?? "";
 
-  const shareText = encodeURIComponent(`i bought you a gift card. ${url}`);
+  const shareText = encodeURIComponent(`i bought you a coffee. ${url}`);
 
   return (
     <div className="space-y-5">
       <div className="text-center">
         <h2 className="text-[clamp(1.875rem,6.5vw,2.5rem)] leading-tight font-medium tracking-[-0.035em] text-cream-50">
-          your gift is ready to send.
+          your coffee is ready to send.
         </h2>
         <p className="mt-3 text-sm text-cream-500">a {value} card, waiting on a link.</p>
       </div>
@@ -647,7 +648,7 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
           {url}
         </p>
         <p className="mt-3 text-xs leading-relaxed text-cream-500">
-          the card code is not in this link. whoever opens it claims the gift once.
+          the card code is not in this link. whoever opens it claims the coffee once.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -676,7 +677,7 @@ function GiftResult({ settlement, value }: { settlement: SettlementResponse; val
 
       <div className="flex justify-center">
         <ButtonLink href="/account" variant="ghost" size="md">
-          see my sent gifts
+          see my sent coffees
         </ButtonLink>
       </div>
     </div>
@@ -691,7 +692,7 @@ function Unavailable({ reason }: { reason: string | null }) {
           {errorCopy(reason)}
         </h2>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-cream-500">
-          our card provider has no inventory we can fulfil right now. we don&rsquo;t list
+          our card provider has no Starbucks inventory we can fulfil right now. we don&rsquo;t list
           cards we can&rsquo;t deliver, so there is nothing to buy until this clears.
         </p>
         <div className="mt-8 flex justify-center">

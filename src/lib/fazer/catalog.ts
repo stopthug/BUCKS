@@ -14,32 +14,18 @@ import {
 } from "./types";
 
 /**
- * Gift-card availability is discovered at runtime by walking the reseller's
- * own catalog. Brands are matched by name, covers come from `include_ui=1`,
- * and if a brand is missing we simply omit it instead of inventing inventory.
+ * Starbucks availability is discovered at runtime by walking the reseller's
+ * own gift-card catalog. Covers come from `include_ui=1`. Nothing about
+ * Starbucks is hardcoded beyond the name match, and if the account carries no
+ * Starbucks category the product says so rather than inventing inventory.
  */
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const CATEGORY_PAGE_SIZE = 200;
 const MAX_CATEGORY_PAGES = 40;
 
+/** Matches "Starbucks", "Starbucks US", "STARBUCKS (Global)", "SBUX". */
 const STARBUCKS_PATTERN = /\bstarbucks\b|\bsbux\b/i;
-const US_HINT = /\b(us|usa|u\.s\.a?\.?|united states)\b/i;
-
-/**
- * Brands we put on the storefront. The provider catalog is much larger;
- * these are the cards the homepage is built around.
- */
-const FEATURED_BRANDS: Array<{ slug: string; pattern: RegExp }> = [
-  { slug: "starbucks", pattern: STARBUCKS_PATTERN },
-  { slug: "amazon", pattern: /\bamazon\b/i },
-  { slug: "steam", pattern: /\bsteam\b/i },
-  { slug: "netflix", pattern: /\bnetflix\b/i },
-  { slug: "spotify", pattern: /\bspotify\b/i },
-  { slug: "apple", pattern: /\b(apple|itunes|app store)\b/i },
-  { slug: "google-play", pattern: /\bgoogle play\b/i },
-  { slug: "playstation", pattern: /\b(playstation|psn)\b/i },
-];
 
 export interface CoffeeOffer {
   categoryId: string;
@@ -147,35 +133,11 @@ async function fetchAllCategories(): Promise<FazerGiftCardCategory[]> {
   return items;
 }
 
-function pickBestCategory(matches: FazerGiftCardCategory[]): FazerGiftCardCategory {
-  const withImage = matches.filter((category) => Boolean(category.imageurl));
-  const pool = withImage.length > 0 ? withImage : matches;
-  const us = pool.filter((category) => US_HINT.test(category.name));
-  const chosen = us[0] ?? pool[0];
-  if (!chosen) {
-    throw new Error("pickBestCategory requires at least one match");
-  }
-  return chosen;
-}
-
-export async function listFeaturedCategories(): Promise<FazerGiftCardCategory[]> {
-  return cached("featured-categories", CACHE_TTL_MS, async () => {
-    const categories = await fetchAllCategories();
-    const selected: FazerGiftCardCategory[] = [];
-
-    for (const brand of FEATURED_BRANDS) {
-      const matches = categories.filter((category) => brand.pattern.test(category.name));
-      if (matches.length === 0) continue;
-      selected.push(pickBestCategory(matches));
-    }
-
-    return selected;
-  });
-}
-
 export async function listStarbucksCategories(): Promise<FazerGiftCardCategory[]> {
-  const featured = await listFeaturedCategories();
-  return featured.filter((category) => STARBUCKS_PATTERN.test(category.name));
+  return cached("starbucks-categories", CACHE_TTL_MS, async () => {
+    const categories = await fetchAllCategories();
+    return categories.filter((category) => STARBUCKS_PATTERN.test(category.name));
+  });
 }
 
 async function fetchOffers(categoryId: string): Promise<{
@@ -217,16 +179,16 @@ function toCoffeeOffer(
 }
 
 /**
- * The live gift-card catalog for this reseller account. Offers with no
+ * The live Starbucks catalog for this reseller account. Offers with no
  * `card_id` or no stock are dropped: we only ever show what can be bought.
  */
 export async function getCoffeeCatalog(): Promise<CoffeeCatalog> {
-  return cached("gift-catalog", CACHE_TTL_MS, async () => {
-    const categories = await listFeaturedCategories();
+  return cached("coffee-catalog", CACHE_TTL_MS, async () => {
+    const categories = await listStarbucksCategories();
 
     if (categories.length === 0) {
       throw new AppError("starbucks_unavailable", {
-        detail: "no featured gift-card categories in the FazerCards account catalog",
+        detail: "no Starbucks category in the FazerCards account catalog",
       });
     }
 
@@ -276,6 +238,11 @@ export async function getLiveOffer(
   cardId: string,
 ): Promise<CoffeeOffer> {
   const { categoryName, imageUrl, offers } = await fetchOffers(categoryId);
+
+  if (!STARBUCKS_PATTERN.test(categoryName)) {
+    throw new AppError("offer_unavailable", { detail: `category ${categoryId} is not Starbucks` });
+  }
+
   const offer = offers.find((entry) => entry.card_id === cardId);
 
   if (!offer || !offer.card_id) {
