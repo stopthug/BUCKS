@@ -16,7 +16,6 @@ import {
   distinctDenominations,
   doodleSeedForOffer,
   groupOffersByCategory,
-  stockLabel,
   type CoffeeMenu,
   type MenuOffer,
 } from "@/lib/menu";
@@ -325,9 +324,11 @@ export function CheckoutFlow({
                         <span className="mt-0.5 block text-[0.8125rem] font-semibold text-ink">
                           {formatUsd(BigInt(entry.providerPriceUsd))}
                         </span>
-                        <span className="mt-0.5 block text-[0.6875rem] font-semibold text-ink-soft">
-                          {stockLabel(entry.stock)}
-                        </span>
+                        {soldOut ? (
+                          <span className="mt-0.5 block text-[0.6875rem] font-semibold text-ink-soft">
+                            Out of stock
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}

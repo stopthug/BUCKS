@@ -14,7 +14,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/glass";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
 import { errorCopy } from "@/lib/errors";
-import { catalogNotice, doodleSeedForOffer, stockLabel, type CoffeeMenu } from "@/lib/menu";
+import { catalogNotice, doodleSeedForOffer, type CoffeeMenu } from "@/lib/menu";
 import { formatUsd } from "@/lib/money";
 
 const WAYS = [
@@ -158,10 +158,12 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                         <p className="mt-0.5 text-[0.8125rem] font-semibold text-ink">
                           {formatUsd(BigInt(offer.providerPriceUsd))}
                         </p>
-                        <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold text-ink-soft">
-                          <StatusDot />
-                          {menu.sandbox && !menu.purchasable ? "Preview" : stockLabel(offer.stock)}
-                        </p>
+                        {menu.sandbox && !menu.purchasable ? (
+                          <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold text-ink-soft">
+                            <StatusDot />
+                            Preview
+                          </p>
+                        ) : null}
                       </div>
                       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                         <ButtonLink
