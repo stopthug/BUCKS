@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { StarbucksMark } from "@/components/brand/starbucks-mark";
+import { SocialLinks } from "@/components/site/social-links";
 import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
@@ -61,7 +62,8 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2">
+          <SocialLinks />
           <ButtonLink href="/coffee" variant="primary" size="sm" className="hidden whitespace-nowrap sm:inline-flex">
             Get a gift card
           </ButtonLink>
@@ -113,6 +115,7 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <SocialLinks className="px-2 py-2" />
         </div>
       </div>
     </header>

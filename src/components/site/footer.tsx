@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { SocialLinks } from "@/components/site/social-links";
+
 export function Footer() {
   return (
     <footer className="relative z-10 bg-forest-600 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-foam">
@@ -31,6 +33,7 @@ export function Footer() {
               <p className="label-mono text-foam/80">Token</p>
               <FooterLink href="/trade">$BUCKS / SBUXx</FooterLink>
               <FooterLink href="/about">About</FooterLink>
+              <SocialLinks tone="foam" className="-ml-1.5" />
             </nav>
           </div>
         </div>
