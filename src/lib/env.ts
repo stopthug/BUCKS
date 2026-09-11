@@ -46,7 +46,14 @@ const schema = z.object({
   /** Wallet that receives USDC for every purchase. */
   TREASURY_WALLET: base58Mint,
 
-  FAZER_API_KEY: z.string().trim().optional(),
+  FAZER_API_KEY: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined;
+      const trimmed = value.trim().replace(/^["']|["']$/g, "").trim();
+      return trimmed || undefined;
+    }),
   FAZER_API_BASE_URL: z.string().trim().url().default("https://api.fzr.cards/api/v2"),
   FAZER_WEBHOOK_SECRET: z.string().trim().optional(),
 

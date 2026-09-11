@@ -8,24 +8,49 @@ import { upsertProduct } from "@/lib/db/queries";
 import type { CoffeeMenu, MenuOffer } from "@/lib/menu";
 import { previewStarbucksMenu } from "@/lib/starbucks-preview";
 
+function emptyMenu(reason: CoffeeMenu["reason"]): CoffeeMenu {
+  return {
+    available: false,
+    purchasable: false,
+    reason,
+    offers: [],
+    sandbox: false,
+  };
+}
+
 /**
  * Server-render-safe view of the Starbucks menu.
  *
  * Pages call this instead of fetching their own API, so the first paint already
- * has inventory. A missing key still falls back to the non-purchasable preview
- * so a fresh local checkout can be designed. Once `FAZER_API_KEY` is set, a
- * provider failure or empty catalog is shown honestly — never swapped for
- * "Test catalog" sample cards.
+ * has inventory. Locally, a missing key still falls back to the non-purchasable
+ * preview. Production never shows those sample cards — missing credentials or a
+ * provider failure is an empty menu, not fake stock.
  */
 export async function loadCoffeeMenu(): Promise<CoffeeMenu> {
+  const production = process.env.NODE_ENV === "production";
   let sandbox = false;
+
   try {
-    sandbox = env().FAZER_DEV_MOCK;
-  } catch {
-    return previewStarbucksMenu();
+    const config = env();
+    sandbox = config.FAZER_DEV_MOCK;
+    console.info("[catalog] credentials", {
+      hasKey: Boolean(config.FAZER_API_KEY),
+      sandbox,
+      production,
+    });
+  } catch (error) {
+    console.warn(
+      "[catalog] env failed",
+      error instanceof Error ? error.message.split("\n")[0] : "unknown",
+    );
+    return production ? emptyMenu("provider_unconfigured") : previewStarbucksMenu();
   }
 
   if (!hasFazerCredentials()) {
+    if (production) {
+      console.warn("[catalog] FAZER_API_KEY missing in production — not serving sample cards");
+      return emptyMenu("provider_unconfigured");
+    }
     return previewStarbucksMenu();
   }
 
@@ -36,13 +61,7 @@ export async function loadCoffeeMenu(): Promise<CoffeeMenu> {
     void snapshotCatalog(catalog.offers);
 
     if (offers.length === 0) {
-      return {
-        available: false,
-        purchasable: false,
-        reason: "starbucks_unavailable",
-        offers: [],
-        sandbox,
-      };
+      return emptyMenu("starbucks_unavailable");
     }
 
     return {
@@ -54,18 +73,12 @@ export async function loadCoffeeMenu(): Promise<CoffeeMenu> {
     };
   } catch (error) {
     const appError = error instanceof AppError ? error : toAppError(error);
-    if (sandbox) {
+    if (sandbox && !production) {
       console.warn(`[catalog] falling back to preview: ${appError.code}`);
       return previewStarbucksMenu();
     }
     console.warn(`[catalog] live catalog unavailable: ${appError.code}`);
-    return {
-      available: false,
-      purchasable: false,
-      reason: appError.code,
-      offers: [],
-      sandbox: false,
-    };
+    return emptyMenu(appError.code);
   }
 }
 
