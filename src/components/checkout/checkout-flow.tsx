@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CardArt } from "@/components/cards/card-art";
 import { CartPanel } from "@/components/checkout/cart-panel";
+import { CheckoutSplit } from "@/components/checkout/checkout-split";
 import { GiftFields } from "@/components/checkout/gift-fields";
 import { PayPanel } from "@/components/checkout/pay-panel";
 import { RevealCard } from "@/components/checkout/reveal-card";
@@ -210,7 +211,7 @@ export function CheckoutFlow({
   }
 
   return (
-    <div className={cn("mx-auto", step === "pay" ? "max-w-4xl" : "max-w-3xl")}>
+    <div className="mx-auto max-w-4xl">
       {notice ? (
         <p className="mb-6 rounded-sm border border-caramel/30 bg-caramel/10 px-4 py-3 text-center text-sm text-ink-soft">
           {notice}
@@ -222,25 +223,12 @@ export function CheckoutFlow({
       <AnimatePresence mode="wait">
         {step === "select" ? (
           <Panel key="select">
-            <GlassCard className="p-4 sm:p-6">
-              <p className="label-mono">Step 1</p>
-              <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
-                {selectedCategory
-                  ? mode === "gift"
-                    ? "How much?"
-                    : "Choose a value"
-                  : mode === "gift"
-                    ? "Which card are you sending?"
-                    : "Choose a card"}
-              </h2>
-              <p className="mt-2 text-sm text-ink-soft">
-                {menu.purchasable
-                  ? "Starbucks gift cards — partnered with Starbucks. Tap a value to continue."
-                  : "These are the values we’ll sell. Checkout opens when stock is live."}
-              </p>
-
-              {!selectedCategory ? (
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {!selectedCategory ? (
+              <GlassCard className="p-4 sm:p-5">
+                <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
+                  {mode === "gift" ? "Which card are you sending?" : "Choose a card"}
+                </h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {categories.map((category) => (
                     <button
                       key={category.categoryId}
@@ -268,98 +256,111 @@ export function CheckoutFlow({
                     </button>
                   ))}
                 </div>
-              ) : (
-                <>
-                  {categories.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCategoryId(null);
-                        setOffer(null);
-                      }}
-                      className="mt-3 text-[0.8125rem] font-semibold text-ink-soft transition-colors hover:text-ink"
-                    >
-                      Choose a different card
-                    </button>
-                  ) : null}
-
-                  <div className={cn("mt-4 grid gap-4", denominations.length > 1 && "sm:grid-cols-2")}>
-                    {denominations.map((entry) => {
-                      const active =
-                        offer?.categoryId === entry.categoryId && offer?.cardId === entry.cardId;
-                      const value = entry.faceValueUsd
-                        ? formatUsd(BigInt(entry.faceValueUsd))
-                        : entry.name;
-                      const soldOut = entry.stock <= 0;
-                      const solo = denominations.length === 1;
-                      return (
-                        <button
-                          key={`${entry.categoryId}:${entry.cardId}`}
-                          type="button"
-                          onClick={() => {
-                            if (!soldOut) setOffer(entry);
-                          }}
-                          disabled={soldOut}
-                          aria-pressed={active}
-                          className={cn(
-                            "overflow-visible rounded-[1.2rem] p-1 text-left transition-transform duration-300 hover:-translate-y-0.5",
-                            solo && "sm:grid sm:grid-cols-[minmax(0,18rem)_1fr] sm:items-center sm:gap-5",
-                            active && "ring-2 ring-ink ring-offset-1 ring-offset-paper sm:ring-offset-2",
-                            soldOut && "cursor-not-allowed opacity-55 hover:translate-y-0",
-                          )}
-                        >
-                          <CardArt
-                            alt={`${entry.categoryName} ${value} gift card`}
-                            faceValueUsd={entry.faceValueUsd}
-                            seed={doodleSeedForOffer(entry)}
-                          />
-                          <span className={cn("block px-1", solo ? "mt-2 sm:mt-0" : "mt-2")}>
-                            <span className="block text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">
-                              {value}
-                            </span>
-                            <span className="mt-0.5 block text-[0.9375rem] font-semibold text-ink">
-                              {formatUsd(BigInt(entry.providerPriceUsd))}
-                            </span>
-                            <span className="mt-0.5 block text-[0.75rem] font-semibold text-ink-soft">
-                              {stockLabel(entry.stock)}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-
-              {mode === "gift" ? (
-                <div className="mt-5">
-                  <GiftFields
-                    senderName={senderName}
-                    message={message}
-                    onSenderName={setSenderName}
-                    onMessage={setMessage}
-                  />
-                </div>
-              ) : null}
-
-              <Button
-                className="mt-5 w-full"
-                size="lg"
-                disabled={!offer || offer.stock <= 0}
-                onClick={() => {
-                  setError(null);
-                  setStep("cart");
-                }}
+              </GlassCard>
+            ) : (
+              <CheckoutSplit
+                art={
+                  offer ? (
+                    <CardArt
+                      alt={`${offer.categoryName} gift card`}
+                      className="w-full"
+                      faceValueUsd={offer.faceValueUsd}
+                      seed={doodleSeedForOffer(offer)}
+                    />
+                  ) : (
+                    <CardArt
+                      alt={`${selectedCategory.categoryName} gift card`}
+                      className="w-full"
+                      faceValueUsd={selectedCategory.offers[0]?.faceValueUsd}
+                      seed={doodleSeedForOffer(selectedCategory.offers[0] ?? {
+                        categoryId: selectedCategory.categoryId,
+                        cardId: selectedCategory.categoryId,
+                        name: selectedCategory.categoryName,
+                        categoryName: selectedCategory.categoryName,
+                      })}
+                    />
+                  )
+                }
               >
-                {offer && offer.stock <= 0
-                  ? "Out of stock"
-                  : offer
-                    ? "Continue"
-                    : selectedCategory
-                      ? "Pick a value"
-                      : "Pick a card"}
-              </Button>
-            </GlassCard>
+                <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
+                  {mode === "gift" ? "Send a gift card" : "Buy a gift card"}
+                </h2>
+                {categories.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategoryId(null);
+                      setOffer(null);
+                    }}
+                    className="mt-1 text-[0.75rem] font-semibold text-ink-soft transition-colors hover:text-ink"
+                  >
+                    Choose a different card
+                  </button>
+                ) : null}
+
+                <div className={cn("mt-3 grid gap-2", denominations.length > 1 && "sm:grid-cols-2")}>
+                  {denominations.map((entry) => {
+                    const active =
+                      offer?.categoryId === entry.categoryId && offer?.cardId === entry.cardId;
+                    const value = entry.faceValueUsd
+                      ? formatUsd(BigInt(entry.faceValueUsd))
+                      : entry.name;
+                    const soldOut = entry.stock <= 0;
+                    return (
+                      <button
+                        key={`${entry.categoryId}:${entry.cardId}`}
+                        type="button"
+                        onClick={() => {
+                          if (!soldOut) setOffer(entry);
+                        }}
+                        disabled={soldOut}
+                        aria-pressed={active}
+                        className={cn(
+                          "glass-soft rounded-[1.05rem] px-3 py-2.5 text-left transition-all duration-200",
+                          active && "bg-mint ring-2 ring-ink ring-offset-1 ring-offset-paper",
+                          soldOut && "cursor-not-allowed opacity-55",
+                        )}
+                      >
+                        <span className="block text-[0.975rem] font-extrabold text-ink">{value}</span>
+                        <span className="mt-0.5 block text-[0.8125rem] font-semibold text-ink">
+                          {formatUsd(BigInt(entry.providerPriceUsd))}
+                        </span>
+                        <span className="mt-0.5 block text-[0.6875rem] font-semibold text-ink-soft">
+                          {stockLabel(entry.stock)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {mode === "gift" ? (
+                  <div className="mt-3">
+                    <GiftFields
+                      senderName={senderName}
+                      message={message}
+                      onSenderName={setSenderName}
+                      onMessage={setMessage}
+                    />
+                  </div>
+                ) : null}
+
+                <Button
+                  className="mt-4 w-full"
+                  size="lg"
+                  disabled={!offer || offer.stock <= 0}
+                  onClick={() => {
+                    setError(null);
+                    setStep("cart");
+                  }}
+                >
+                  {offer && offer.stock <= 0
+                    ? "Out of stock"
+                    : offer
+                      ? "Continue"
+                      : "Pick a value"}
+                </Button>
+              </CheckoutSplit>
+            )}
           </Panel>
         ) : null}
 
@@ -449,7 +450,7 @@ function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
   const index = step === "select" || step === "cart" ? 0 : step === "pay" || step === "settling" ? 1 : 2;
 
   return (
-    <ol className="mb-4 flex items-center justify-center gap-2" aria-label="progress">
+    <ol className="mb-3 flex items-center justify-center gap-2" aria-label="progress">
       {labels.map((label, position) => (
         <li key={label} className="flex items-center gap-2">
           <span
@@ -529,92 +530,111 @@ function Result({
   }
 
   if (mode === "gift") {
-    return <GiftResult settlement={settlement} value={value} />;
+    return <GiftResult settlement={settlement} value={value} offer={offer} />;
   }
 
   return (
-    <div className="space-y-5">
-      <div className="text-center">
-        <h2 className="text-[clamp(2rem,7vw,2.75rem)] leading-none font-medium tracking-[-0.035em] text-ink">
-          You got coffee.
-        </h2>
-        <p className="mt-3 text-sm text-ink-soft">
-          {offer?.categoryName ?? "Starbucks"} gift card · {value}
-        </p>
+    <CheckoutSplit
+      art={
+        offer ? (
+          <CardArt
+            alt={`${offer.categoryName} gift card`}
+            className="w-full"
+            faceValueUsd={offer.faceValueUsd}
+            seed={doodleSeedForOffer(offer)}
+          />
+        ) : null
+      }
+    >
+      <h2 className="text-xl font-extrabold tracking-[-0.03em] text-ink">You got coffee.</h2>
+      <p className="mt-1 text-sm text-ink-soft">
+        {offer?.categoryName ?? "Starbucks"} gift card · {value}
+      </p>
+      <div className="mt-3">
+        <RevealCard
+          onReveal={onReveal}
+          title={`${offer?.categoryName ?? "Starbucks"} ${value}`}
+          subtitle="Tap reveal when you’re ready to use it."
+        />
       </div>
-
-      <RevealCard
-        onReveal={onReveal}
-        title={`${offer?.categoryName ?? "Starbucks"} ${value}`}
-        subtitle="Tap reveal when you’re ready to use it."
-      />
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <ButtonLink href="/account" variant="secondary" size="md">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <ButtonLink href="/account" variant="secondary" size="md" className="flex-1">
           My purchases
         </ButtonLink>
-        <ButtonLink href="/gift" variant="secondary" size="md">
+        <ButtonLink href="/gift" variant="secondary" size="md" className="flex-1">
           Send one to a friend
         </ButtonLink>
       </div>
-    </div>
+    </CheckoutSplit>
   );
 }
 
-function GiftResult({ settlement, value }: { settlement: SettlementResponse; value: string }) {
+function GiftResult({
+  settlement,
+  value,
+  offer,
+}: {
+  settlement: SettlementResponse;
+  value: string;
+  offer: MenuOffer | null;
+}) {
   const [copied, setCopied] = useState(false);
   const url = settlement.claimUrl ?? "";
 
   const shareText = encodeURIComponent(`I got you a Starbucks card: ${url}`);
 
   return (
-    <div className="space-y-5">
-      <div className="text-center">
-        <h2 className="text-[clamp(1.875rem,6.5vw,2.5rem)] leading-tight font-medium tracking-[-0.035em] text-ink">
-          Ready to send.
-        </h2>
-        <p className="mt-3 text-sm text-ink-soft">A {value} card, waiting on a link.</p>
-      </div>
-
-      <GlassCard className="p-6">
-        <p className="label-mono">Gift link</p>
-        <p className="mt-3 rounded-sm bg-foam px-3.5 py-3 font-mono text-[0.8125rem] break-all text-ink">
-          {url}
-        </p>
-        <p className="mt-3 text-xs leading-relaxed text-ink-soft">
-          The card code is not in this link. Whoever opens it can claim the coffee once.
-        </p>
-
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button
-            className="flex-1"
-            size="lg"
-            onClick={() => {
-              void navigator.clipboard?.writeText(url).then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1800);
-              });
-            }}
-          >
-            {copied ? "Copied" : "Copy gift link"}
-          </Button>
-          <ButtonLink
-            href={`https://x.com/intent/tweet?text=${shareText}`}
-            variant="secondary"
-            size="lg"
-            className="flex-1"
-          >
-            Share on X
-          </ButtonLink>
-        </div>
-      </GlassCard>
-
-      <div className="flex justify-center">
-        <ButtonLink href="/account" variant="ghost" size="md">
-          See my sent coffees
+    <CheckoutSplit
+      art={
+        offer ? (
+          <CardArt
+            alt={`${offer.categoryName} gift card`}
+            className="w-full"
+            faceValueUsd={offer.faceValueUsd}
+            seed={doodleSeedForOffer(offer)}
+          />
+        ) : (
+          <div>
+            <p className="text-xl font-extrabold tracking-[-0.03em] text-ink">Ready to send.</p>
+            <p className="mt-1 text-sm text-ink-soft">A {value} card, waiting on a link.</p>
+          </div>
+        )
+      }
+    >
+      <h2 className="text-xl font-extrabold tracking-[-0.03em] text-ink">Ready to send.</h2>
+      <p className="mt-1 text-sm text-ink-soft">A {value} card, waiting on a link.</p>
+      <p className="mt-2 rounded-[1.05rem] bg-foam px-3 py-2.5 font-mono text-[0.75rem] break-all text-ink">
+        {url}
+      </p>
+      <p className="mt-2 text-[0.75rem] leading-relaxed text-ink-soft">
+        The code is not in this link. Whoever opens it can claim the coffee once.
+      </p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <Button
+          className="flex-1"
+          size="lg"
+          onClick={() => {
+            void navigator.clipboard?.writeText(url).then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1800);
+            });
+          }}
+        >
+          {copied ? "Copied" : "Copy gift link"}
+        </Button>
+        <ButtonLink
+          href={`https://x.com/intent/tweet?text=${shareText}`}
+          variant="secondary"
+          size="lg"
+          className="flex-1"
+        >
+          Share on X
         </ButtonLink>
       </div>
-    </div>
+      <ButtonLink href="/account" variant="ghost" size="md" className="mt-2">
+        See my sent coffees
+      </ButtonLink>
+    </CheckoutSplit>
   );
 }
 

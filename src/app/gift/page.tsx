@@ -17,20 +17,17 @@ export default async function GiftPage({ searchParams }: PageProps<"/gift">) {
   const menu = await loadCoffeeMenu();
 
   return (
-    <div className="px-4 pt-20 pb-12 sm:px-6 sm:pt-24">
+    <div className="px-4 pt-16 pb-8 sm:px-6 sm:pt-20">
       <Reveal>
         <header className="mx-auto max-w-2xl text-center">
           <p className="label-mono">Gift</p>
-          <h1 className="font-display mt-2 text-[clamp(1.85rem,5vw,2.6rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
+          <h1 className="font-display mt-1 text-[clamp(1.5rem,4vw,2.1rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             Send someone a coffee.
           </h1>
-          <p className="mx-auto mt-2 max-w-sm text-[1.05rem] leading-relaxed text-ink">
-            You pay. They get a Starbucks gift card link. They don’t need a wallet to open it.
-          </p>
         </header>
       </Reveal>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <CheckoutFlow menu={menu} mode="gift" initialCardId={cardId} />
       </div>
     </div>

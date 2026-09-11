@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { StarbucksMark, StarbucksPartner } from "@/components/brand/starbucks-mark";
+import { StarbucksPartner } from "@/components/brand/starbucks-mark";
 import { CardArt } from "@/components/cards/card-art";
+import { CheckoutSplit } from "@/components/checkout/checkout-split";
 import {
   DoodleCardsIcon,
   DoodleEnvelopeIcon,
@@ -121,66 +122,65 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
       </section>
 
       <section className="relative px-4 pb-10 sm:px-6">
-        <div id="cards" className="relative mx-auto max-w-6xl">
-          <div className="mb-6 flex flex-col items-center text-center">
-            <StarbucksMark className="size-12" />
-            <h2 className="mt-3 text-[clamp(1.6rem,3.5vw,2.1rem)] font-extrabold tracking-[-0.03em] text-ink">
+        <div id="cards" className="relative mx-auto max-w-4xl">
+          <div className="mb-4 text-center">
+            <p className="label-mono">Gift cards</p>
+            <h2 className="mt-1 text-[clamp(1.55rem,4vw,2.1rem)] font-extrabold tracking-[-0.03em] text-ink">
               Starbucks gift cards
             </h2>
-            <p className="mt-2 max-w-md text-[1.05rem] leading-relaxed text-ink">
-              Partnered with Starbucks. Pick a value — every card is a real code you can spend
-              in-store or in the app.
-            </p>
           </div>
           {menu.available ? (
-            <RevealGroup
-              className={
-                cards.length === 1
-                  ? "mx-auto max-w-3xl"
-                  : "grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-              }
-            >
-              {cards.map((offer, index) => {
+            <RevealGroup className={cards.length === 1 ? undefined : "grid gap-4 sm:grid-cols-1"}>
+              {cards.map((offer) => {
                 const value = offer.faceValueUsd
                   ? formatUsd(BigInt(offer.faceValueUsd))
                   : offer.name;
-                const solo = cards.length === 1;
+                const soldOut = offer.stock <= 0;
 
                 return (
                   <RevealItem key={`${offer.categoryId}:${offer.cardId}`}>
-                    <Link
-                      href={`/coffee?card=${encodeURIComponent(offer.cardId)}`}
-                      className={
-                        solo
-                          ? "group grid items-center gap-5 sm:grid-cols-[minmax(0,22rem)_1fr] sm:gap-8"
-                          : "group block"
-                      }
-                    >
-                      <div className="relative transition-transform duration-300 group-hover:-translate-y-1">
+                    <CheckoutSplit
+                      art={
                         <CardArt
                           alt={`${offer.categoryName} ${value} gift card`}
+                          className="w-full"
                           faceValueUsd={offer.faceValueUsd}
                           seed={doodleSeedForOffer(offer)}
-                          className="rounded-none bg-transparent shadow-none"
-                          priority={index < 4}
                         />
-                      </div>
-                      <div className={solo ? "px-1 sm:px-0" : "px-1 pt-3"}>
-                        <p className="text-xl font-extrabold tracking-[-0.03em] text-ink">
-                          {value} Starbucks card
+                      }
+                    >
+                      <h3 className="text-xl font-extrabold tracking-[-0.02em] text-ink">
+                        Buy a gift card
+                      </h3>
+                      <p className="mt-0.5 text-sm font-semibold text-ink-soft">{offer.categoryName}</p>
+                      <div className="glass-soft mt-3 rounded-[1.05rem] px-3 py-2.5">
+                        <p className="text-[0.975rem] font-extrabold text-ink">{value}</p>
+                        <p className="mt-0.5 text-[0.8125rem] font-semibold text-ink">
+                          {formatUsd(BigInt(offer.providerPriceUsd))}
                         </p>
-                        <p className="mt-0.5 text-sm font-semibold text-ink-soft">{offer.categoryName}</p>
-                        <div className="mt-1.5 flex items-center justify-between gap-3 sm:justify-start sm:gap-6">
-                          <p className="text-[0.9375rem] font-semibold text-ink">
-                            {formatUsd(BigInt(offer.providerPriceUsd))}
-                          </p>
-                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-600">
-                            <StatusDot />
-                            {menu.sandbox && !menu.purchasable ? "Preview" : stockLabel(offer.stock)}
-                          </span>
-                        </div>
+                        <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold text-ink-soft">
+                          <StatusDot />
+                          {menu.sandbox && !menu.purchasable ? "Preview" : stockLabel(offer.stock)}
+                        </p>
                       </div>
-                    </Link>
+                      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                        <ButtonLink
+                          href={`/coffee?card=${encodeURIComponent(offer.cardId)}`}
+                          size="lg"
+                          className="flex-1"
+                        >
+                          {soldOut ? "Out of stock" : "Get a gift card"}
+                        </ButtonLink>
+                        <ButtonLink
+                          href={`/gift?card=${encodeURIComponent(offer.cardId)}`}
+                          variant="secondary"
+                          size="lg"
+                          className="flex-1"
+                        >
+                          Send a gift
+                        </ButtonLink>
+                      </div>
+                    </CheckoutSplit>
                   </RevealItem>
                 );
               })}
