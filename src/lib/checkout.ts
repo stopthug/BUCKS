@@ -11,7 +11,7 @@ import { AppError, isAppError } from "@/lib/errors";
 import { assertFulfillable, getLiveOffer, type CoffeeOffer } from "@/lib/fazer/catalog";
 import { getJupiterUsdPrice } from "@/lib/jupiter/client";
 import { quoteCoffeePayment } from "@/lib/jupiter/pricing";
-import { USD_DECIMALS, addBasisPoints, divideCeil, parseDecimalToBaseUnits, toUiAmount } from "@/lib/money";
+import { USD_DECIMALS, addBasisPoints, ceilToFractionDigits, divideCeil, parseDecimalToBaseUnits, toUiAmount, PAYMENT_UI_DECIMALS } from "@/lib/money";
 import { getAsset, getUsdcAsset, type AssetConfig } from "@/lib/solana/assets";
 
 /**
@@ -92,11 +92,11 @@ export async function createCheckoutQuote(input: CreateQuoteInput): Promise<Chec
 
   const quoteId = randomUUID();
   const paymentMemo = `bucks:${quoteId}`;
-  const suffix = uniqueAmountSuffix(quoteId);
+  const suffix = uniqueAmountSuffix(quoteId, asset.decimals);
 
   const settlement =
     asset.symbol === "USDC"
-      ? quoteDirectUsdc(requiredUsdc, suffix)
+      ? quoteDirectUsdc(requiredUsdc, suffix, asset.decimals)
       : await quotePaymentAsset({ asset, usdc, requiredUsdc, suffix });
 
   const quote = await insertQuote({
@@ -135,9 +135,9 @@ interface Settlement {
   routerFeeBps: number | null;
 }
 
-function quoteDirectUsdc(requiredUsdc: bigint, suffix: bigint): Settlement {
+function quoteDirectUsdc(requiredUsdc: bigint, suffix: bigint, decimals: number): Settlement {
   return {
-    payAmount: requiredUsdc + suffix,
+    payAmount: ceilToFractionDigits(requiredUsdc, decimals, PAYMENT_UI_DECIMALS) + suffix,
     routeLabel: null,
     jupiterRequestId: null,
     networkFeeLamports: 0n,
@@ -179,7 +179,7 @@ async function quoteViaJupiter(args: {
   });
 
   return {
-    payAmount: quote.inAmount + suffix,
+    payAmount: ceilToFractionDigits(quote.inAmount, asset.decimals, PAYMENT_UI_DECIMALS) + suffix,
     routeLabel: quote.routeLabel,
     jupiterRequestId: quote.requestId,
     networkFeeLamports: 0n,
@@ -201,7 +201,12 @@ async function quoteDirectFromSpot(args: {
   const usdPrice = await getJupiterUsdPrice(asset.mint);
   const priceUsdc = parseDecimalToBaseUnits(usdPrice.toFixed(usdc.decimals), usdc.decimals);
   const buffered = addBasisPoints(requiredUsdc, 100);
-  const payAmount = divideCeil(buffered * 10n ** BigInt(asset.decimals), priceUsdc) + suffix;
+  const payAmount =
+    ceilToFractionDigits(
+      divideCeil(buffered * 10n ** BigInt(asset.decimals), priceUsdc),
+      asset.decimals,
+      PAYMENT_UI_DECIMALS,
+    ) + suffix;
 
   return {
     payAmount,
@@ -216,13 +221,16 @@ async function quoteDirectFromSpot(args: {
 }
 
 /**
- * Extra base units from the quote id so two identical cards in the same window
- * still produce distinct on-chain amounts.
+ * Extra units at 4 displayed decimals so two identical cards still produce
+ * distinct on-chain amounts the watcher can match.
  */
-function uniqueAmountSuffix(quoteId: string): bigint {
+function uniqueAmountSuffix(quoteId: string, decimals: number): bigint {
+  const display = Math.min(PAYMENT_UI_DECIMALS, decimals);
+  const factor = 10n ** BigInt(decimals - display);
   const hex = quoteId.replace(/-/g, "").slice(0, 4);
   const value = BigInt(`0x${hex}`);
-  return value === 0n ? 1n : value;
+  const tick = value % 99n;
+  return (tick === 0n ? 1n : tick) * factor;
 }
 
 function solanaPayUrl(args: {

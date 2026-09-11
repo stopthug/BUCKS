@@ -6,6 +6,9 @@
 
 export const USD_DECIMALS = 6;
 
+/** Buyer-facing payment amounts (copy + Solana Pay) stay at 4 fraction digits. */
+export const PAYMENT_UI_DECIMALS = 4;
+
 export class MoneyError extends Error {}
 
 /** Parses a decimal string (`"10.4200"`) into base units for `decimals`. */
@@ -68,12 +71,8 @@ export function formatUsd(amount: bigint): string {
 }
 
 /**
- * Formats a token amount for display: enough significant digits to be useful
- * for both cheap memecoins and expensive assets, without scientific notation.
- */
-/**
  * Exact decimal string with no grouping. Used for Solana Pay URLs and the
- * amount the buyer copies — truncating here would make the watched amount miss.
+ * amount the buyer copies — it must match the watched on-chain amount.
  */
 export function toUiAmount(amount: bigint, decimals: number): string {
   if (amount < 0n) throw new MoneyError("Negative amounts are not supported");
@@ -82,6 +81,14 @@ export function toUiAmount(amount: bigint, decimals: number): string {
   const fraction = amount % divisor;
   if (fraction === 0n) return whole.toString();
   return `${whole.toString()}.${fraction.toString().padStart(decimals, "0").replace(/0+$/, "")}`;
+}
+
+/** Rounds up so a token amount has at most `fractionDigits` places after the point. */
+export function ceilToFractionDigits(amount: bigint, decimals: number, fractionDigits: number): bigint {
+  if (fractionDigits < 0) throw new MoneyError("fractionDigits must be >= 0");
+  if (fractionDigits >= decimals) return amount;
+  const factor = 10n ** BigInt(decimals - fractionDigits);
+  return divideCeil(amount, factor) * factor;
 }
 
 export function formatTokenAmount(amount: bigint, decimals: number): string {
