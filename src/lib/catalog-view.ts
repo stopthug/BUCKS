@@ -1,6 +1,8 @@
 import "server-only";
 
-import { env, hasFazerCredentials } from "@/lib/env";
+import { connection } from "next/server";
+
+import { env, envStatus, hasFazerCredentials } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import { getCoffeeCatalog, type CoffeeOffer } from "@/lib/fazer/catalog";
 import { toAppError } from "@/lib/fazer/client";
@@ -27,21 +29,25 @@ function emptyMenu(reason: CoffeeMenu["reason"]): CoffeeMenu {
  * provider failure is an empty menu, not fake stock.
  */
 export async function loadCoffeeMenu(): Promise<CoffeeMenu> {
+  await connection();
+
   const production = process.env.NODE_ENV === "production";
   let sandbox = false;
+  const status = envStatus();
+  console.info("[catalog] credentials", {
+    hasKey: status.hasFazerKey,
+    envOk: status.ok,
+    missing: status.missing,
+    production,
+  });
 
   try {
-    const config = env();
-    sandbox = config.FAZER_DEV_MOCK;
-    console.info("[catalog] credentials", {
-      hasKey: Boolean(config.FAZER_API_KEY),
-      sandbox,
-      production,
-    });
+    sandbox = env().FAZER_DEV_MOCK;
   } catch (error) {
     console.warn(
       "[catalog] env failed",
       error instanceof Error ? error.message.split("\n")[0] : "unknown",
+      status.missing,
     );
     return production ? emptyMenu("provider_unconfigured") : previewStarbucksMenu();
   }

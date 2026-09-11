@@ -181,7 +181,9 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             <div className="doodle-panel px-6 py-14 text-center">
               <p className="text-2xl font-extrabold tracking-[-0.02em] text-ink">{errorCopy(menu.reason)}</p>
               <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
-                We only list cards we can send. Check back when stock returns.
+                {menu.reason === "provider_unconfigured"
+                  ? "This deploy doesn’t have the card supplier connected yet. That’s a server setting, not an empty shelf."
+                  : "We only list cards we can send. Check back when stock returns."}
               </p>
             </div>
           )}

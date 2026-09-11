@@ -15,7 +15,7 @@ export const ERROR_COPY = {
   forbidden: "That isn’t yours to open.",
 
   // Provider catalog / fulfillment capacity
-  provider_unconfigured: "Starbucks cards are sold out right now.",
+  provider_unconfigured: "The live card shop isn’t connected on this server yet.",
   starbucks_unavailable: "Starbucks cards are sold out right now.",
   offer_unavailable: "That card just sold out. Pick another value.",
   out_of_stock: "That card just sold out. Pick another value.",
