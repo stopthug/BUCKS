@@ -43,6 +43,7 @@ export const viewport: Viewport = {
   themeColor: "#006241",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   // Checkout has to stay legible when a wallet browser zooms it.
   maximumScale: 5,
 };

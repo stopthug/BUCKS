@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="relative z-10 bg-forest-600 py-8 text-foam">
+    <footer className="relative z-10 bg-forest-600 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-foam">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="hairline h-px opacity-40" />
 

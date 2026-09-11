@@ -24,7 +24,7 @@ export default async function AccountPage() {
     : null;
 
   return (
-    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
+    <div className="px-4 pt-20 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-3xl">
           <p className="label-mono">Account</p>

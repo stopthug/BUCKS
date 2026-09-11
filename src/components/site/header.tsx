@@ -21,12 +21,12 @@ export function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b-[3px] border-ink bg-[#e8f3ea]">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <StarbucksMark className="size-9" />
-          <span className="flex flex-col leading-none">
-            <span className="text-[1.15rem] font-extrabold tracking-tight text-ink">$BUCKS</span>
-            <span className="text-[0.6rem] font-extrabold tracking-[0.12em] text-ink-soft uppercase">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6">
+        <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <StarbucksMark className="size-8 shrink-0 sm:size-9" />
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="text-[1.05rem] font-extrabold tracking-tight text-ink sm:text-[1.15rem]">$BUCKS</span>
+            <span className="hidden text-[0.6rem] font-extrabold tracking-[0.12em] text-ink-soft uppercase sm:block">
               Partnered with Starbucks
             </span>
           </span>
@@ -62,7 +62,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <ButtonLink href="/coffee" variant="primary" size="sm">
+          <ButtonLink href="/coffee" variant="primary" size="sm" className="hidden whitespace-nowrap sm:inline-flex">
             Get a gift card
           </ButtonLink>
           <button

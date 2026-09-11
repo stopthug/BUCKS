@@ -10,13 +10,13 @@ export function PageDoodles() {
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden text-forest-600"
     >
-      <Cup className="absolute top-[22%] left-[max(0.5rem,calc((100vw-72rem)/2-5.25rem))] w-[4.5rem] -rotate-[14deg] opacity-[0.32] sm:w-20 lg:w-[5.5rem]" />
-      <Beans className="absolute top-[52%] left-[max(0.65rem,calc((100vw-72rem)/2-4.5rem))] w-14 rotate-[16deg] opacity-[0.28] sm:w-16" />
-      <Leaf className="absolute bottom-[14%] left-[max(0.5rem,calc((100vw-72rem)/2-5rem))] w-16 -rotate-[10deg] opacity-[0.26] lg:w-[4.5rem]" />
+      <Cup className="absolute top-[22%] left-[max(0.5rem,calc((100vw-72rem)/2-5.25rem))] hidden w-[4.5rem] -rotate-[14deg] opacity-[0.32] md:block sm:w-20 lg:w-[5.5rem]" />
+      <Beans className="absolute top-[52%] left-[max(0.65rem,calc((100vw-72rem)/2-4.5rem))] hidden w-14 rotate-[16deg] opacity-[0.28] md:block sm:w-16" />
+      <Leaf className="absolute bottom-[14%] left-[max(0.5rem,calc((100vw-72rem)/2-5rem))] hidden w-16 -rotate-[10deg] opacity-[0.26] md:block lg:w-[4.5rem]" />
 
-      <Spark className="absolute top-[19%] right-[max(1rem,calc((100vw-72rem)/2-2.5rem))] w-7 opacity-[0.3]" />
-      <Takeaway className="absolute top-[40%] right-[max(0.5rem,calc((100vw-72rem)/2-5.25rem))] w-[4.5rem] rotate-[11deg] opacity-[0.32] sm:w-20 lg:w-[5.5rem]" />
-      <Steam className="absolute bottom-[18%] right-[max(0.85rem,calc((100vw-72rem)/2-4rem))] w-12 opacity-[0.24] lg:w-14" />
+      <Spark className="absolute top-[19%] right-[max(1rem,calc((100vw-72rem)/2-2.5rem))] hidden w-7 opacity-[0.3] md:block" />
+      <Takeaway className="absolute top-[40%] right-[max(0.5rem,calc((100vw-72rem)/2-5.25rem))] hidden w-[4.5rem] rotate-[11deg] opacity-[0.32] md:block sm:w-20 lg:w-[5.5rem]" />
+      <Steam className="absolute bottom-[18%] right-[max(0.85rem,calc((100vw-72rem)/2-4rem))] hidden w-12 opacity-[0.24] md:block lg:w-14" />
     </div>
   );
 }

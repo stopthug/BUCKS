@@ -222,7 +222,7 @@ export function CheckoutFlow({
       <AnimatePresence mode="wait">
         {step === "select" ? (
           <Panel key="select">
-            <GlassCard className="p-5 sm:p-6">
+            <GlassCard className="p-4 sm:p-6">
               <p className="label-mono">Step 1</p>
               <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
                 {selectedCategory
@@ -304,7 +304,7 @@ export function CheckoutFlow({
                           className={cn(
                             "overflow-visible rounded-[1.2rem] p-1 text-left transition-transform duration-300 hover:-translate-y-0.5",
                             solo && "sm:grid sm:grid-cols-[minmax(0,18rem)_1fr] sm:items-center sm:gap-5",
-                            active && "ring-2 ring-ink ring-offset-2 ring-offset-foam",
+                            active && "ring-2 ring-ink ring-offset-1 ring-offset-paper sm:ring-offset-2",
                             soldOut && "cursor-not-allowed opacity-55 hover:translate-y-0",
                           )}
                         >

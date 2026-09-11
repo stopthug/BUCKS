@@ -53,19 +53,19 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
 
   return (
     <>
-      <section className="relative px-4 pt-24 pb-8 sm:px-6 sm:pt-24 sm:pb-10">
+      <section className="relative px-4 pt-20 pb-8 sm:px-6 sm:pt-24 sm:pb-10">
         <div className="relative mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_1fr] lg:gap-3">
-          <div className="order-2 lg:order-1">
+          <div className="hidden lg:order-1 lg:block">
             <HeroFan side="left" />
           </div>
 
-          <div className="order-1 text-center lg:order-2">
+          <div className="text-center lg:order-2">
             <Reveal>
               <StarbucksPartner size="lg" />
             </Reveal>
 
             <Reveal delay={0.05}>
-              <h1 className="font-display mt-3 text-[clamp(2.1rem,5.5vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.04em] text-ink">
+              <h1 className="font-display mt-3 text-[clamp(2rem,8vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.04em] text-ink">
                 Gift the perfect cup
               </h1>
             </Reveal>
@@ -74,24 +74,28 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
               <p className="mx-auto mt-3 max-w-sm text-[1.05rem] leading-relaxed text-ink">
                 Official Starbucks gift cards, paid with $BUCKS, SBUXx, SOL, or USDC.
               </p>
-              <p className="mx-auto mt-2 max-w-sm text-[1.125rem] leading-relaxed text-ink">
+              <p className="mx-auto mt-2 max-w-sm text-[1.05rem] leading-relaxed text-ink">
                 Keep one, or send the link.
               </p>
             </Reveal>
 
             <Reveal delay={0.14}>
-              <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <ButtonLink href="/coffee" size="lg">
+              <div className="mt-5 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <ButtonLink href="/coffee" size="lg" className="w-full sm:w-auto">
                   Get a gift card
                 </ButtonLink>
-                <ButtonLink href="/gift" variant="secondary" size="lg">
+                <ButtonLink href="/gift" variant="secondary" size="lg" className="w-full sm:w-auto">
                   Send a gift
                 </ButtonLink>
               </div>
             </Reveal>
+
+            <div className="mt-8 lg:hidden">
+              <HeroFan side="left" compact />
+            </div>
           </div>
 
-          <div className="order-3">
+          <div className="hidden lg:order-3 lg:block">
             <HeroFan side="right" />
           </div>
         </div>
@@ -105,10 +109,10 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                 <way.icon />
               </span>
               <h2 className="mt-3 text-lg font-extrabold tracking-[-0.02em] text-ink">{way.title}</h2>
-              <p className="mx-auto mt-1.5 max-w-[16rem] text-[0.9375rem] leading-relaxed text-ink">
+              <p className="mx-auto mt-1.5 max-w-[16rem] text-[0.8125rem] leading-relaxed text-ink sm:text-[0.9375rem]">
                 {way.body}
               </p>
-              <Link href={way.href} className="btn-doodle-ghost mt-3 inline-flex h-10 items-center rounded-[1.2rem] px-5">
+              <Link href={way.href} className="btn-doodle-ghost mt-3 inline-flex h-9 items-center rounded-[1.2rem] px-3 text-[0.8rem] sm:h-10 sm:px-5 sm:text-[0.9rem]">
                 {way.action}
               </Link>
             </div>

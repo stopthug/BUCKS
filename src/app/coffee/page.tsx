@@ -17,7 +17,7 @@ export default async function CoffeePage({ searchParams }: PageProps<"/coffee">)
   const menu = await loadCoffeeMenu();
 
   return (
-    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
+    <div className="px-4 pt-20 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-2xl text-center">
           <p className="label-mono">Checkout</p>

@@ -16,7 +16,7 @@ export default async function TradePage() {
   const market = await getPairMarket().catch(() => null);
 
   return (
-    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
+    <div className="px-4 pt-20 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-3xl text-center">
           <p className="label-mono">The pair</p>

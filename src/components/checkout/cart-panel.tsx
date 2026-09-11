@@ -38,7 +38,7 @@ export function CartPanel({
   const price = formatUsd(BigInt(offer.providerPriceUsd));
 
   return (
-    <GlassCard className="mx-auto max-w-lg p-5 sm:p-7">
+    <GlassCard className="mx-auto max-w-lg p-4 sm:p-7">
       <div className="flex items-start justify-between gap-3">
         <h2 className="text-xl font-extrabold tracking-[-0.03em] text-ink">Your cart · 1</h2>
         <button
@@ -109,7 +109,7 @@ export function CartPanel({
       </p>
 
       <div className="mt-6">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
           <label htmlFor="receipt-email" className="text-[0.9375rem] font-extrabold text-ink">
             Email for your receipt
           </label>

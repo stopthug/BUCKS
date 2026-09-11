@@ -30,7 +30,7 @@ export function PaymentMethods({
         <p className="text-[0.75rem] font-semibold text-ink-soft">Solana network</p>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         {RADIO_ASSETS.map((asset) => {
           const active = selected === asset.symbol;
           return (
@@ -41,17 +41,20 @@ export function PaymentMethods({
               disabled={disabled}
               aria-pressed={active}
               className={cn(
-                "glass-soft flex items-center gap-3 rounded-[1.15rem] px-3.5 py-3.5 text-left transition-all duration-200",
+                "glass-soft flex flex-col items-center gap-1.5 rounded-[1.15rem] px-2 py-3 text-center transition-all duration-200",
+                "sm:flex-row sm:items-center sm:gap-3 sm:px-3.5 sm:py-3.5 sm:text-left",
                 "hover:-translate-y-0.5 disabled:opacity-50",
-                active && "bg-mint ring-2 ring-ink ring-offset-2 ring-offset-foam",
+                active && "bg-mint ring-2 ring-ink ring-offset-1 ring-offset-paper sm:ring-offset-2",
               )}
             >
-              <PaymentDoodle symbol={asset.symbol} className="size-10 shrink-0" />
+              <PaymentDoodle symbol={asset.symbol} className="size-8 shrink-0 sm:size-10" />
               <span className="min-w-0 flex-1">
-                <span className="block text-[0.9375rem] font-extrabold text-ink">{asset.name}</span>
-                <span className="block text-[0.75rem] font-semibold text-ink-soft">{asset.subtitle}</span>
+                <span className="block text-[0.875rem] font-extrabold text-ink sm:text-[0.9375rem]">{asset.name}</span>
+                <span className="hidden text-[0.75rem] font-semibold text-ink-soft sm:block">{asset.subtitle}</span>
               </span>
-              <RadioMark active={active} />
+              <span className="hidden sm:block">
+                <RadioMark active={active} />
+              </span>
             </button>
           );
         })}
@@ -63,9 +66,9 @@ export function PaymentMethods({
         disabled={disabled}
         aria-expanded={xStocksOpen}
         className={cn(
-          "glass-soft mt-2.5 flex w-full items-center gap-3 rounded-[1.15rem] px-3.5 py-3.5 text-left transition-all duration-200",
+          "glass-soft mt-2.5 flex w-full items-center gap-3 rounded-[1.15rem] px-3 py-3 text-left transition-all duration-200 sm:px-3.5 sm:py-3.5",
           "hover:-translate-y-0.5 disabled:opacity-50",
-          xStocksOpen && "bg-mint ring-2 ring-ink ring-offset-2 ring-offset-foam",
+          xStocksOpen && "bg-mint ring-2 ring-ink ring-offset-1 ring-offset-paper sm:ring-offset-2",
         )}
       >
         <PaymentDoodle symbol="SBUXx" className="size-10 shrink-0" />

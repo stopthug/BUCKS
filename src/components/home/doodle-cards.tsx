@@ -1,5 +1,7 @@
 /** Shared pen: warm ink, slightly shaky paths, cream paper. */
 
+import { useId } from "react";
+
 type DoodleProps = {
   note?: string;
   valueLabel?: string;
@@ -8,7 +10,7 @@ type DoodleProps = {
 };
 
 function Frame({ fill }: { fill: string }) {
-  const shineId = `gc-${fill.replace("#", "")}`;
+  const shineId = `gc-${useId().replace(/:/g, "")}`;
   return (
     <>
       <defs>

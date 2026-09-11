@@ -49,7 +49,7 @@ export function PayPanel({
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)] lg:items-start">
-        <GlassCard className="p-5 sm:p-7">
+        <GlassCard className="p-4 sm:p-7">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <AssetGlyph symbol={quote.asset.symbol} />
@@ -63,7 +63,7 @@ export function PayPanel({
               <img
                 src={quote.qrDataUrl}
                 alt={`Solana Pay QR for ${quote.payAmountUi} ${quote.asset.symbol}`}
-                className="size-[13.5rem] rounded-[1.1rem] border-2 border-ink bg-foam p-2 sm:size-[15rem]"
+                className="size-[min(13.5rem,calc(100vw-6rem))] rounded-[1.1rem] border-2 border-ink bg-foam p-2 sm:size-[15rem]"
               />
             </div>
           ) : null}
@@ -116,7 +116,7 @@ export function PayPanel({
           ) : null}
         </GlassCard>
 
-        <GlassCard className="p-5 sm:p-6">
+        <GlassCard className="p-4 sm:p-6">
           <h3 className="text-lg font-extrabold tracking-[-0.03em] text-ink">Your receipt</h3>
           <div className="mt-4 flex items-start justify-between gap-3 text-sm">
             <div>

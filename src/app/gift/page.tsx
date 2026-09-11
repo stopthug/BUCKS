@@ -17,7 +17,7 @@ export default async function GiftPage({ searchParams }: PageProps<"/gift">) {
   const menu = await loadCoffeeMenu();
 
   return (
-    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
+    <div className="px-4 pt-20 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-2xl text-center">
           <p className="label-mono">Gift</p>
