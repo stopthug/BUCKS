@@ -11,17 +11,17 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="px-4 pt-32 pb-24 sm:px-6 sm:pt-36">
+    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-2xl text-center">
           <p className="label-mono">About</p>
-          <h1 className="font-display mt-4 text-[clamp(2.25rem,7vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
+          <h1 className="font-display mt-2 text-[clamp(1.9rem,5vw,2.75rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             A coffee token that buys coffee.
           </h1>
         </header>
       </Reveal>
 
-      <div className="mx-auto mt-14 max-w-2xl space-y-4">
+      <div className="mx-auto mt-8 max-w-2xl space-y-4">
         <Reveal>
           <GlassCard className="p-8">
             <h2 className="text-lg font-extrabold tracking-[-0.02em] text-ink">Partnered with Starbucks</h2>

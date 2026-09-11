@@ -12,7 +12,7 @@ import type { PairMarket } from "@/lib/market/pair";
  */
 export function PairSection({ market }: { market: PairMarket }) {
   return (
-    <section className="relative px-4 sm:px-6" id="pair">
+    <section className="relative px-4 pb-10 sm:px-6" id="pair">
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -34,7 +34,7 @@ export function PairSection({ market }: { market: PairMarket }) {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <GlassCard className="mt-10 overflow-hidden">
+          <GlassCard className="mt-6 overflow-hidden">
             <div className="flex flex-col gap-4 border-b border-cream-200/8 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <div className="flex items-center gap-3">
                 <p className="text-xl font-medium tracking-[-0.02em] text-ink">

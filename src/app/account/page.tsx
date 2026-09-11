@@ -24,11 +24,11 @@ export default async function AccountPage() {
     : null;
 
   return (
-    <div className="px-4 pt-32 pb-24 sm:px-6 sm:pt-36">
+    <div className="px-4 pt-24 pb-12 sm:px-6 sm:pt-24">
       <Reveal>
         <header className="mx-auto max-w-3xl">
           <p className="label-mono">Account</p>
-          <h1 className="font-display mt-4 text-[clamp(2.25rem,7vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
+          <h1 className="font-display mt-2 text-[clamp(1.9rem,5vw,2.75rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             Your coffee.
           </h1>
           {session?.address ? (
@@ -41,7 +41,7 @@ export default async function AccountPage() {
         </header>
       </Reveal>
 
-      <div className="mx-auto mt-12 max-w-3xl">
+      <div className="mx-auto mt-6 max-w-3xl">
         {!session ? (
           <ConnectPrompt />
         ) : !data ? (

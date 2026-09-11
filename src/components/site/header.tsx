@@ -20,7 +20,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b-[3px] border-ink bg-foam">
+    <header className="fixed inset-x-0 top-0 z-50 border-b-[3px] border-ink bg-[#e8f3ea]">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5">
           <StarbucksMark className="size-9" />
@@ -98,7 +98,7 @@ export function Header() {
 
       <div
         className={cn(
-          "overflow-hidden border-t-[3px] border-ink bg-foam transition-all duration-300 ease-out md:hidden",
+          "overflow-hidden border-t-[3px] border-ink bg-[#e8f3ea] transition-all duration-300 ease-out md:hidden",
           menuOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0",
         )}
       >

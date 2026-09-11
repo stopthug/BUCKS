@@ -210,7 +210,7 @@ export function CheckoutFlow({
   }
 
   return (
-    <div className={cn("mx-auto", step === "pay" ? "max-w-4xl" : "max-w-2xl")}>
+    <div className={cn("mx-auto", step === "pay" ? "max-w-4xl" : "max-w-3xl")}>
       {notice ? (
         <p className="mb-6 rounded-sm border border-caramel/30 bg-caramel/10 px-4 py-3 text-center text-sm text-ink-soft">
           {notice}
@@ -222,7 +222,7 @@ export function CheckoutFlow({
       <AnimatePresence mode="wait">
         {step === "select" ? (
           <Panel key="select">
-            <GlassCard className="p-6 sm:p-8">
+            <GlassCard className="p-5 sm:p-6">
               <p className="label-mono">Step 1</p>
               <h2 className="mt-2 text-2xl font-medium tracking-[-0.02em] text-ink">
                 {selectedCategory
@@ -283,7 +283,7 @@ export function CheckoutFlow({
                     </button>
                   ) : null}
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <div className={cn("mt-4 grid gap-4", denominations.length > 1 && "sm:grid-cols-2")}>
                     {denominations.map((entry) => {
                       const active =
                         offer?.categoryId === entry.categoryId && offer?.cardId === entry.cardId;
@@ -291,6 +291,7 @@ export function CheckoutFlow({
                         ? formatUsd(BigInt(entry.faceValueUsd))
                         : entry.name;
                       const soldOut = entry.stock <= 0;
+                      const solo = denominations.length === 1;
                       return (
                         <button
                           key={`${entry.categoryId}:${entry.cardId}`}
@@ -302,6 +303,7 @@ export function CheckoutFlow({
                           aria-pressed={active}
                           className={cn(
                             "overflow-visible rounded-[1.2rem] p-1 text-left transition-transform duration-300 hover:-translate-y-0.5",
+                            solo && "sm:grid sm:grid-cols-[minmax(0,18rem)_1fr] sm:items-center sm:gap-5",
                             active && "ring-2 ring-ink ring-offset-2 ring-offset-foam",
                             soldOut && "cursor-not-allowed opacity-55 hover:translate-y-0",
                           )}
@@ -311,14 +313,16 @@ export function CheckoutFlow({
                             faceValueUsd={entry.faceValueUsd}
                             seed={doodleSeedForOffer(entry)}
                           />
-                          <span className="mt-2 block px-1 text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">
-                            {value}
-                          </span>
-                          <span className="mt-0.5 block px-1 text-[0.9375rem] font-semibold text-ink">
-                            {formatUsd(BigInt(entry.providerPriceUsd))}
-                          </span>
-                          <span className="mt-0.5 block px-1 text-[0.75rem] font-semibold text-ink-soft">
-                            {stockLabel(entry.stock)}
+                          <span className={cn("block px-1", solo ? "mt-2 sm:mt-0" : "mt-2")}>
+                            <span className="block text-[1.05rem] font-extrabold tracking-[-0.02em] text-ink">
+                              {value}
+                            </span>
+                            <span className="mt-0.5 block text-[0.9375rem] font-semibold text-ink">
+                              {formatUsd(BigInt(entry.providerPriceUsd))}
+                            </span>
+                            <span className="mt-0.5 block text-[0.75rem] font-semibold text-ink-soft">
+                              {stockLabel(entry.stock)}
+                            </span>
                           </span>
                         </button>
                       );
@@ -328,7 +332,7 @@ export function CheckoutFlow({
               )}
 
               {mode === "gift" ? (
-                <div className="mt-8">
+                <div className="mt-5">
                   <GiftFields
                     senderName={senderName}
                     message={message}
@@ -339,7 +343,7 @@ export function CheckoutFlow({
               ) : null}
 
               <Button
-                className="mt-8 w-full"
+                className="mt-5 w-full"
                 size="lg"
                 disabled={!offer || offer.stock <= 0}
                 onClick={() => {
@@ -445,7 +449,7 @@ function Steps({ step, mode }: { step: Step; mode: "purchase" | "gift" }) {
   const index = step === "select" || step === "cart" ? 0 : step === "pay" || step === "settling" ? 1 : 2;
 
   return (
-    <ol className="mb-6 flex items-center justify-center gap-2" aria-label="progress">
+    <ol className="mb-4 flex items-center justify-center gap-2" aria-label="progress">
       {labels.map((label, position) => (
         <li key={label} className="flex items-center gap-2">
           <span

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4ead8",
+  themeColor: "#006241",
   width: "device-width",
   initialScale: 1,
   // Checkout has to stay legible when a wallet browser zooms it.

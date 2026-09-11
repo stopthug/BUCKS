@@ -22,7 +22,7 @@ export function HeroFan({ side }: { side: "left" | "right" }) {
   return (
     <div
       className={cn(
-        "relative mx-auto h-[22rem] w-full max-w-[22rem] sm:h-[26rem]",
+        "relative mx-auto h-[18rem] w-full max-w-[20rem] sm:h-[22rem]",
         side === "right" && "lg:ml-auto",
         side === "left" && "lg:mr-auto",
       )}

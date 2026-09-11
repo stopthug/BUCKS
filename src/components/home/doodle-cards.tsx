@@ -8,14 +8,55 @@ type DoodleProps = {
 };
 
 function Frame({ fill }: { fill: string }) {
+  const shineId = `gc-${fill.replace("#", "")}`;
   return (
-    <path
-      d="M38 56c8-26 548-34 570-2 16 26 24 288 4 322-18 30-542 32-570 4C14 352 18 90 38 56Z"
-      fill={fill}
-      stroke="#2c2416"
-      strokeWidth="8"
-      strokeLinejoin="round"
-    />
+    <>
+      <defs>
+        <linearGradient id={shineId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#1a8f5c" />
+          <stop offset="42%" stopColor={fill} />
+          <stop offset="100%" stopColor="#003626" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M42 52c12-18 536-26 560 6 16 22 22 276 4 314-16 28-536 32-560 6C20 348 22 78 42 52Z"
+        fill={`url(#${shineId})`}
+        stroke="#d4c48a"
+        strokeWidth="8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M62 72c8-10 500-14 520 4 12 14 16 248 2 276-12 22-500 24-520 4C44 336 46 90 62 72Z"
+        fill="none"
+        stroke="#f4ead8"
+        strokeWidth="2.2"
+        opacity="0.4"
+      />
+      <path d="M86 108h468" stroke="#d4c48a" strokeWidth="3.5" strokeLinecap="round" />
+      <text
+        x="86"
+        y="98"
+        fill="#f4ead8"
+        fontFamily="var(--font-nunito), ui-rounded, sans-serif"
+        fontWeight={800}
+        fontSize={22}
+        letterSpacing="0.28em"
+      >
+        STARBUCKS
+      </text>
+      <text
+        x="86"
+        y="368"
+        fill="#f4ead8"
+        fontFamily="var(--font-nunito), ui-rounded, sans-serif"
+        fontWeight={800}
+        fontSize={16}
+        letterSpacing="0.22em"
+        opacity="0.85"
+      >
+        GIFT CARD
+      </text>
+    </>
   );
 }
 
@@ -24,17 +65,17 @@ function Spark({ x, y }: { x: number; y: number }) {
     <path
       d={`M${x} ${y - 10} l2 8 8 2-8 2-2 8-2-8-8-2 8-2 z`}
       fill="none"
-      stroke="#2c2416"
+      stroke="#f4ead8"
       strokeWidth="3"
       strokeLinejoin="round"
     />
   );
 }
 
-function Note({ x, y, children }: { x: number; y: number; children?: string }) {
+function Note({ x, children }: { x: number; y: number; children?: string }) {
   if (!children) return null;
   return (
-    <text x={x} y={y} fill="#2c2416" fontFamily="var(--font-caveat), cursive" fontSize={42}>
+    <text x={x} y={152} fill="#f4ead8" fontFamily="var(--font-caveat), cursive" fontSize={34}>
       {children}
     </text>
   );
@@ -47,7 +88,7 @@ function ValueMark({ label }: { label?: string }) {
       x={548}
       y={334}
       textAnchor="end"
-      fill="#2c2416"
+      fill="#f4ead8"
       fontFamily="var(--font-nunito), ui-rounded, sans-serif"
       fontWeight={800}
       fontSize={42}
@@ -61,8 +102,8 @@ function ValueMark({ label }: { label?: string }) {
 function SirenStamp({
   x,
   y,
-  size = 82,
-  rotate = -8,
+  size = 118,
+  rotate = -6,
 }: {
   x: number;
   y: number;
@@ -78,10 +119,10 @@ function SirenStamp({
         rx={r - 1}
         ry={r + 1.4}
         fill="#fff8ee"
-        stroke="#2c2416"
-        strokeWidth="3.2"
+        stroke="#d4c48a"
+        strokeWidth="4"
       />
-      <image href="/brand/starbucks.svg" x={5} y={5} width={size - 10} height={size - 10} />
+      <image href="/brand/starbucks.svg" x={6} y={6} width={size - 12} height={size - 12} />
     </g>
   );
 }
@@ -90,7 +131,7 @@ function SirenStamp({
 export function DoodleCupCard({ note = "for you", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#fbf3e4"} />
+      <Frame fill={paper ?? "#006241"} />
       <path
         d="M236 186c4-8 156-10 162 8v96c-6 46-152 50-160 6V186Z"
         fill="#f0d9bf"
@@ -121,7 +162,7 @@ export function DoodleCupCard({ note = "for you", valueLabel, paper, stampRotate
 export function DoodleBeanCard({ note = "sip sip", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#e7f0d8"} />
+      <Frame fill={paper ?? "#004c32"} />
       <path
         d="M214 168c-8-36 28-62 68-48 38 14 54 58 28 90-24 30-70 22-88-8-10-16-12-24-8-34Z"
         fill="#7a5340"
@@ -159,7 +200,7 @@ export function DoodleBeanCard({ note = "sip sip", valueLabel, paper, stampRotat
 export function DoodleTwoCupsCard({ note = "on me", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#f6ddd0"} />
+      <Frame fill={paper ?? "#006241"} />
       <path
         d="M176 196c2-8 108-8 112 8v82c-4 38-108 42-112 4V196Z"
         fill="#f4ead8"
@@ -207,7 +248,7 @@ export function DoodleTwoCupsCard({ note = "on me", valueLabel, paper, stampRota
 export function DoodleGiftCard({ note = "yours", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#dce8d4"} />
+      <Frame fill={paper ?? "#004c32"} />
       <path
         d="M206 186h228v136c0 10-10 14-18 14H222c-10 0-16-6-16-16V186Z"
         fill="#f4ead8"
@@ -243,7 +284,7 @@ export function DoodleGiftCard({ note = "yours", valueLabel, paper, stampRotate 
 export function DoodleHeartSteamCard({ note = "warm", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#f3e4d4"} />
+      <Frame fill={paper ?? "#0a5c3a"} />
       <path
         d="M250 208c0-8 140-8 146 6v88c-4 44-142 48-148 4V208Z"
         fill="#ead2bc"
@@ -276,7 +317,7 @@ export function DoodleHeartSteamCard({ note = "warm", valueLabel, paper, stampRo
 export function DoodleMoonCard({ note = "later", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#e4ebe3"} />
+      <Frame fill={paper ?? "#1a6b45"} />
       <path
         d="M430 128c-28-4-48 22-40 48 8 24 38 34 58 18 4-4 8-10 8-16-22 4-40-12-36-32 2-12 12-18 22-18-4-4-8-2-12 0Z"
         fill="none"
@@ -311,7 +352,7 @@ export function DoodleMoonCard({ note = "later", valueLabel, paper, stampRotate 
 export function DoodlePastryCard({ note = "treat", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#f8e6c8"} />
+      <Frame fill={paper ?? "#00573a"} />
       <path
         d="M198 214c18-56 86-78 148-52 52 22 86 70 58 104-22 28-78 18-128 8-46-10-90-8-78-60Z"
         fill="#e8b56a"
@@ -345,7 +386,7 @@ export function DoodlePastryCard({ note = "treat", valueLabel, paper, stampRotat
 export function DoodleTakeawayCard({ note = "to go", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#efe4d2"} />
+      <Frame fill={paper ?? "#147a4c"} />
       <path
         d="M246 168h148l-16 148c-4 28-116 30-122 2L246 168Z"
         fill="#f4ead8"
@@ -369,7 +410,7 @@ export function DoodleTakeawayCard({ note = "to go", valueLabel, paper, stampRot
 export function DoodleSleeveCard({ note = "hold", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#e8f0e4"} />
+      <Frame fill={paper ?? "#003d28"} />
       <path
         d="M248 176c2-8 144-8 150 8v98c-4 42-146 46-154 4V176Z"
         fill="#f4ead8"
@@ -402,7 +443,7 @@ export function DoodleSleeveCard({ note = "hold", valueLabel, paper, stampRotate
 export function DoodleStackCard({ note = "stack", valueLabel, paper, stampRotate }: DoodleProps = {}) {
   return (
     <svg viewBox="0 0 640 400" className="h-auto w-full" aria-hidden>
-      <Frame fill={paper ?? "#f1e0d4"} />
+      <Frame fill={paper ?? "#0d6640"} />
       <path
         d="M214 150h196l18 108c2 16-8 22-22 22H230c-14 0-22-8-22-22Z"
         fill="#ead2bc"
@@ -465,7 +506,18 @@ const KIND_NOTES: Record<DoodleKind, string> = {
   stack: "stack",
 };
 
-const PAPERS = ["#fbf3e4", "#e7f0d8", "#f6ddd0", "#dce8d4", "#f3e4d4", "#e4ebe3", "#f8e6c8", "#efe4d2", "#e8f0e4", "#f1e0d4"];
+const PAPERS = [
+  "#006241",
+  "#004c32",
+  "#0a5c3a",
+  "#1a6b45",
+  "#00573a",
+  "#147a4c",
+  "#003d28",
+  "#0d6640",
+  "#186b42",
+  "#024f34",
+];
 
 function hashSeed(seed: string) {
   let hash = 0;

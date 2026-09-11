@@ -53,9 +53,8 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
 
   return (
     <>
-      <section className="relative bg-mint px-4 pt-28 pb-16 sm:px-6 sm:pt-32 sm:pb-20">
-        <Scribbles />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_minmax(0,22rem)_1fr] lg:gap-4">
+      <section className="relative px-4 pt-24 pb-8 sm:px-6 sm:pt-24 sm:pb-10">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-[1fr_minmax(0,20rem)_1fr] lg:gap-3">
           <div className="order-2 lg:order-1">
             <HeroFan side="left" />
           </div>
@@ -66,13 +65,13 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             </Reveal>
 
             <Reveal delay={0.05}>
-              <h1 className="font-display mt-5 text-[clamp(2.4rem,6.5vw,4.25rem)] leading-[1.05] font-extrabold tracking-[-0.04em] text-ink">
+              <h1 className="font-display mt-3 text-[clamp(2.1rem,5.5vw,3.5rem)] leading-[1.05] font-extrabold tracking-[-0.04em] text-ink">
                 Gift the perfect cup
               </h1>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <p className="mx-auto mt-5 max-w-sm text-[1.125rem] leading-relaxed text-ink">
+              <p className="mx-auto mt-3 max-w-sm text-[1.05rem] leading-relaxed text-ink">
                 Official Starbucks gift cards, paid with $BUCKS, SBUXx, SOL, or USDC.
               </p>
               <p className="mx-auto mt-2 max-w-sm text-[1.125rem] leading-relaxed text-ink">
@@ -81,7 +80,7 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             </Reveal>
 
             <Reveal delay={0.14}>
-              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <ButtonLink href="/coffee" size="lg">
                   Get a gift card
                 </ButtonLink>
@@ -98,18 +97,18 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
         </div>
       </section>
 
-      <section className="bg-paper px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto grid max-w-6xl gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+      <section className="relative px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
           {WAYS.map((way) => (
             <div key={way.title} className="text-center">
               <span className="mx-auto flex size-12 items-center justify-center text-ink">
                 <way.icon />
               </span>
-              <h2 className="mt-4 text-lg font-extrabold tracking-[-0.02em] text-ink">{way.title}</h2>
-              <p className="mx-auto mt-2 max-w-[16rem] text-[0.9375rem] leading-relaxed text-ink">
+              <h2 className="mt-3 text-lg font-extrabold tracking-[-0.02em] text-ink">{way.title}</h2>
+              <p className="mx-auto mt-1.5 max-w-[16rem] text-[0.9375rem] leading-relaxed text-ink">
                 {way.body}
               </p>
-              <Link href={way.href} className="btn-doodle-ghost mt-5 inline-flex h-10 items-center rounded-[1.2rem] px-5">
+              <Link href={way.href} className="btn-doodle-ghost mt-3 inline-flex h-10 items-center rounded-[1.2rem] px-5">
                 {way.action}
               </Link>
             </div>
@@ -117,11 +116,11 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
         </div>
       </section>
 
-      <section className="bg-paper px-4 pb-16 sm:px-6">
+      <section className="relative px-4 pb-10 sm:px-6">
         <div id="cards" className="relative mx-auto max-w-6xl">
-          <div className="mb-10 flex flex-col items-center text-center">
-            <StarbucksMark className="size-14" />
-            <h2 className="mt-4 text-[clamp(1.75rem,4vw,2.35rem)] font-extrabold tracking-[-0.03em] text-ink">
+          <div className="mb-6 flex flex-col items-center text-center">
+            <StarbucksMark className="size-12" />
+            <h2 className="mt-3 text-[clamp(1.6rem,3.5vw,2.1rem)] font-extrabold tracking-[-0.03em] text-ink">
               Starbucks gift cards
             </h2>
             <p className="mt-2 max-w-md text-[1.05rem] leading-relaxed text-ink">
@@ -133,20 +132,25 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
             <RevealGroup
               className={
                 cards.length === 1
-                  ? "mx-auto grid max-w-sm gap-6"
-                  : "grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+                  ? "mx-auto max-w-3xl"
+                  : "grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
               }
             >
               {cards.map((offer, index) => {
                 const value = offer.faceValueUsd
                   ? formatUsd(BigInt(offer.faceValueUsd))
                   : offer.name;
+                const solo = cards.length === 1;
 
                 return (
                   <RevealItem key={`${offer.categoryId}:${offer.cardId}`}>
                     <Link
                       href={`/coffee?card=${encodeURIComponent(offer.cardId)}`}
-                      className="group block"
+                      className={
+                        solo
+                          ? "group grid items-center gap-5 sm:grid-cols-[minmax(0,22rem)_1fr] sm:gap-8"
+                          : "group block"
+                      }
                     >
                       <div className="relative transition-transform duration-300 group-hover:-translate-y-1">
                         <CardArt
@@ -157,12 +161,12 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                           priority={index < 4}
                         />
                       </div>
-                      <div className="px-1 pt-4">
+                      <div className={solo ? "px-1 sm:px-0" : "px-1 pt-3"}>
                         <p className="text-xl font-extrabold tracking-[-0.03em] text-ink">
                           {value} Starbucks card
                         </p>
                         <p className="mt-0.5 text-sm font-semibold text-ink-soft">{offer.categoryName}</p>
-                        <div className="mt-1.5 flex items-center justify-between gap-3">
+                        <div className="mt-1.5 flex items-center justify-between gap-3 sm:justify-start sm:gap-6">
                           <p className="text-[0.9375rem] font-semibold text-ink">
                             {formatUsd(BigInt(offer.providerPriceUsd))}
                           </p>
@@ -194,25 +198,5 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
         </div>
       </section>
     </>
-  );
-}
-
-function Scribbles() {
-  return (
-    <svg
-      className="pointer-events-none absolute inset-0 h-full w-full text-ink/20"
-      viewBox="0 0 1200 640"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden
-    >
-      <path d="M40 90c20-10 20 10 40 0" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M92 70l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M1100 140c-24-8-18 16-42 6" fill="none" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M80 520c30 8 28-16 58-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M160 430c8-18 4-8 18-24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M1040 480c-18 10-12-14-34-2" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M1120 88l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M600 40c18-6 16 10 34 2" fill="none" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
   );
 }

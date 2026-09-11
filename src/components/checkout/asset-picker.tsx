@@ -1,5 +1,6 @@
 "use client";
 
+import { PaymentDoodle } from "@/components/checkout/payment-doodles";
 import { CHECKOUT_ASSETS, type CheckoutAsset } from "@/lib/checkout-limits";
 import { cn } from "@/lib/cn";
 
@@ -45,7 +46,7 @@ export function PaymentMethods({
                 active && "bg-mint ring-2 ring-ink ring-offset-2 ring-offset-foam",
               )}
             >
-              <AssetGlyph symbol={asset.symbol} />
+              <PaymentDoodle symbol={asset.symbol} className="size-10 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block text-[0.9375rem] font-extrabold text-ink">{asset.name}</span>
                 <span className="block text-[0.75rem] font-semibold text-ink-soft">{asset.subtitle}</span>
@@ -67,15 +68,7 @@ export function PaymentMethods({
           xStocksOpen && "bg-mint ring-2 ring-ink ring-offset-2 ring-offset-foam",
         )}
       >
-        <span className="flex -space-x-1.5" aria-hidden>
-          {["#111111", "#76b900", "#cc0000", "#00d4aa"].map((color) => (
-            <span
-              key={color}
-              className="size-6 rounded-full border-2 border-foam"
-              style={{ background: color }}
-            />
-          ))}
-        </span>
+        <PaymentDoodle symbol="SBUXx" className="size-10 shrink-0" />
         <span className="min-w-0 flex-1">
           <span className="block text-[0.9375rem] font-extrabold text-ink">Pay with xStocks</span>
           <span className="block text-[0.75rem] font-semibold text-ink-soft">Starbucks xStock · SBUXx</span>
@@ -98,24 +91,8 @@ export function PaymentMethods({
   );
 }
 
-const GLYPHS: Record<string, string> = {
-  SBUXx: "radial-gradient(70% 60% at 32% 26%, #cfeadb 0%, #6bb489 32%, #1f4d34 74%, #10281b 100%)",
-  SOL: "radial-gradient(70% 60% at 32% 26%, #dcd6ff 0%, #9a8cf0 34%, #4a3f8f 74%, #221d42 100%)",
-  USDC: "radial-gradient(70% 60% at 32% 26%, #d6e8ff 0%, #7ba7e8 34%, #2f568f 74%, #16294a 100%)",
-};
-
 export function AssetGlyph({ symbol }: { symbol: string }) {
-  return (
-    <span
-      aria-hidden
-      className="size-9 shrink-0 rounded-full"
-      style={{
-        background: GLYPHS[symbol] ?? GLYPHS.USDC,
-        boxShadow:
-          "inset 0 -3px 7px rgba(0,0,0,0.35), inset 0 2px 6px rgba(255,245,230,0.28), 0 8px 16px -12px rgba(0,0,0,0.55)",
-      }}
-    />
-  );
+  return <PaymentDoodle symbol={symbol} className="size-9 shrink-0" />;
 }
 
 function RadioMark({ active }: { active: boolean }) {
