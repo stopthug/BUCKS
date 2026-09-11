@@ -80,6 +80,22 @@ export type ServerEnv = z.infer<typeof schema>;
 
 let cached: ServerEnv | null = null;
 
+function blank(value: string | undefined): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = value.trim().replace(/^["']|["']$/g, "").trim();
+  return trimmed || undefined;
+}
+
+function vercelAppUrl(): string | undefined {
+  const configured = blank(process.env.APP_URL);
+  if (configured) return configured;
+  const production = blank(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  if (production) return production.startsWith("http") ? production : `https://${production}`;
+  const deployment = blank(process.env.VERCEL_URL);
+  if (deployment) return `https://${deployment}`;
+  return undefined;
+}
+
 /**
  * Static `process.env.NAME` reads. Passing `process.env` straight into Zod
  * can drop keys Next.js did not see referenced at build time.
@@ -87,24 +103,24 @@ let cached: ServerEnv | null = null;
 function fromProcess(): Record<string, string | undefined> {
   return {
     NODE_ENV: process.env.NODE_ENV,
-    DATABASE_URL: process.env.DATABASE_URL,
-    SESSION_SECRET: process.env.SESSION_SECRET,
-    ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
-    APP_URL: process.env.APP_URL,
-    SOLANA_RPC_URL: process.env.SOLANA_RPC_URL,
-    JUPITER_API_KEY: process.env.JUPITER_API_KEY,
-    JUPITER_API_BASE_URL: process.env.JUPITER_API_BASE_URL,
-    USDC_MINT: process.env.USDC_MINT,
-    SBUXX_MINT: process.env.SBUXX_MINT,
-    BUCKS_MINT: process.env.BUCKS_MINT,
-    TREASURY_WALLET: process.env.TREASURY_WALLET,
-    FAZER_API_KEY: process.env.FAZER_API_KEY,
-    FAZER_API_BASE_URL: process.env.FAZER_API_BASE_URL,
-    FAZER_WEBHOOK_SECRET: process.env.FAZER_WEBHOOK_SECRET,
-    BUCKS_SBUXX_PAIR_ADDRESS: process.env.BUCKS_SBUXX_PAIR_ADDRESS,
-    BUCKS_TRADE_URL: process.env.BUCKS_TRADE_URL,
-    DEXSCREENER_URL: process.env.DEXSCREENER_URL,
-    FAZER_DEV_MOCK: process.env.FAZER_DEV_MOCK,
+    DATABASE_URL: blank(process.env.DATABASE_URL),
+    SESSION_SECRET: blank(process.env.SESSION_SECRET),
+    ENCRYPTION_KEY: blank(process.env.ENCRYPTION_KEY),
+    APP_URL: vercelAppUrl(),
+    SOLANA_RPC_URL: blank(process.env.SOLANA_RPC_URL) ?? "https://api.mainnet-beta.solana.com",
+    JUPITER_API_KEY: blank(process.env.JUPITER_API_KEY),
+    JUPITER_API_BASE_URL: blank(process.env.JUPITER_API_BASE_URL),
+    USDC_MINT: blank(process.env.USDC_MINT),
+    SBUXX_MINT: blank(process.env.SBUXX_MINT),
+    BUCKS_MINT: blank(process.env.BUCKS_MINT),
+    TREASURY_WALLET: blank(process.env.TREASURY_WALLET),
+    FAZER_API_KEY: blank(process.env.FAZER_API_KEY),
+    FAZER_API_BASE_URL: blank(process.env.FAZER_API_BASE_URL),
+    FAZER_WEBHOOK_SECRET: blank(process.env.FAZER_WEBHOOK_SECRET),
+    BUCKS_SBUXX_PAIR_ADDRESS: blank(process.env.BUCKS_SBUXX_PAIR_ADDRESS),
+    BUCKS_TRADE_URL: blank(process.env.BUCKS_TRADE_URL),
+    DEXSCREENER_URL: blank(process.env.DEXSCREENER_URL),
+    FAZER_DEV_MOCK: blank(process.env.FAZER_DEV_MOCK),
   };
 }
 
