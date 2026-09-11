@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PairSection } from "@/components/home/pair-section";
+import { ContractAddress } from "@/components/home/contract-address";
 import { GlassCard } from "@/components/ui/glass";
 import { Reveal } from "@/components/ui/reveal";
 import { getPairMarket } from "@/lib/market/pair";
@@ -27,6 +28,7 @@ export default async function TradePage() {
             SBUXx is tokenized Starbucks stock on Solana. $BUCKS is built to trade next to it —
             and to buy the same coffee.
           </p>
+          <ContractAddress />
         </header>
       </Reveal>
 

@@ -2,6 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
+import { BUCKS_MINT as PUBLIC_BUCKS_MINT, DEXSCREENER_TOKEN_URL } from "@/lib/public-token";
+
 /**
  * Server-side environment. Importing this from a client component is a build
  * error thanks to `server-only`, which keeps provider credentials out of the
@@ -53,7 +55,7 @@ const schema = z.object({
 
   USDC_MINT: base58Mint.default("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
   SBUXX_MINT: optionalBase58Mint.default("Xs9gd8SGbYQn9kkUYQayn46BdqQbvvUshEF6ZpRAzM7"),
-  BUCKS_MINT: optionalBase58Mint,
+  BUCKS_MINT: optionalBase58Mint.default(PUBLIC_BUCKS_MINT),
 
   /** Wallet that receives USDC for every purchase. */
   TREASURY_WALLET: base58Mint,
@@ -115,14 +117,14 @@ function fromProcess(): Record<string, string | undefined> {
     JUPITER_API_BASE_URL: blank(process.env.JUPITER_API_BASE_URL),
     USDC_MINT: blank(process.env.USDC_MINT),
     SBUXX_MINT: blank(process.env.SBUXX_MINT),
-    BUCKS_MINT: blank(process.env.BUCKS_MINT),
+    BUCKS_MINT: blank(process.env.BUCKS_MINT) ?? PUBLIC_BUCKS_MINT,
     TREASURY_WALLET: blank(process.env.TREASURY_WALLET),
     FAZER_API_KEY: blank(process.env.FAZER_API_KEY),
     FAZER_API_BASE_URL: blank(process.env.FAZER_API_BASE_URL),
     FAZER_WEBHOOK_SECRET: blank(process.env.FAZER_WEBHOOK_SECRET),
     BUCKS_SBUXX_PAIR_ADDRESS: blank(process.env.BUCKS_SBUXX_PAIR_ADDRESS),
     BUCKS_TRADE_URL: blank(process.env.BUCKS_TRADE_URL),
-    DEXSCREENER_URL: blank(process.env.DEXSCREENER_URL),
+    DEXSCREENER_URL: blank(process.env.DEXSCREENER_URL) ?? DEXSCREENER_TOKEN_URL,
     FAZER_DEV_MOCK: blank(process.env.FAZER_DEV_MOCK),
   };
 }

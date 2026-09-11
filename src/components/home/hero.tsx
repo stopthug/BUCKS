@@ -9,6 +9,7 @@ import {
   DoodleHeartIcon,
   DoodleTagIcon,
 } from "@/components/home/doodle-cards";
+import { ContractAddress } from "@/components/home/contract-address";
 import { HeroFan } from "@/components/home/hero-fan";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/glass";
@@ -89,6 +90,10 @@ export function Hero({ menu }: { menu: CoffeeMenu }) {
                   Send a gift
                 </ButtonLink>
               </div>
+            </Reveal>
+
+            <Reveal delay={0.18}>
+              <ContractAddress />
             </Reveal>
 
             <div className="mt-8 lg:hidden">

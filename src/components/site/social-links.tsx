@@ -1,7 +1,8 @@
+import { DEXSCREENER_TOKEN_URL } from "@/lib/public-token";
 import { cn } from "@/lib/cn";
 
 export const X_URL = "https://x.com/usastarbucks";
-export const DEXSCREENER_URL = "https://dexscreener.com/solana";
+export const DEXSCREENER_URL = DEXSCREENER_TOKEN_URL;
 
 export function SocialLinks({
   className,

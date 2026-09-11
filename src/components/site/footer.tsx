@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ContractAddress } from "@/components/home/contract-address";
 import { SocialLinks } from "@/components/site/social-links";
 
 export function Footer() {
@@ -20,6 +21,7 @@ export function Footer() {
               Holding $BUCKS does not mean you own Starbucks stock, and it cannot be swapped 1:1
               for SBUXx. This is not financial advice.
             </p>
+            <ContractAddress tone="foam" align="start" className="mt-4" />
           </div>
 
           <div className="grid grid-cols-2 gap-8">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ContractAddress } from "@/components/home/contract-address";
 import { ButtonLink } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass";
 import { Reveal } from "@/components/ui/reveal";
@@ -18,6 +19,7 @@ export default function AboutPage() {
           <h1 className="font-display mt-2 text-[clamp(1.9rem,5vw,2.75rem)] leading-[1.05] font-extrabold tracking-[-0.03em] text-ink">
             A coffee token that buys coffee.
           </h1>
+          <ContractAddress />
         </header>
       </Reveal>
 
