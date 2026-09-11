@@ -103,7 +103,10 @@ function vercelAppUrl(): string | undefined {
 function fromProcess(): Record<string, string | undefined> {
   return {
     NODE_ENV: process.env.NODE_ENV,
-    DATABASE_URL: blank(process.env.DATABASE_URL),
+    DATABASE_URL: blank(process.env.DATABASE_URL)
+      ?? blank(process.env.POSTGRES_PRISMA_URL)
+      ?? blank(process.env.POSTGRES_URL)
+      ?? blank(process.env.POSTGRES_URL_NON_POOLING),
     SESSION_SECRET: blank(process.env.SESSION_SECRET),
     ENCRYPTION_KEY: blank(process.env.ENCRYPTION_KEY),
     APP_URL: vercelAppUrl(),
